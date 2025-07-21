@@ -362,6 +362,11 @@ class VideoAgent(BaseAgent):
                 f"Generating images for {len(state['scenes'])} scenes using {model_name} (Group Mode - Dynamic LoRA selection)...",
                 "bright_cyan",
             )
+        elif lora_mode == 'none':
+            status_update(
+                f"Generating images for {len(state['scenes'])} scenes using {model_name} (None Mode - Base model only)...",
+                "bright_cyan",
+            )
         else:
             status_update(
                 f"Generating images for {len(state['scenes'])} scenes using {model_name} (All Mode - Consistent LoRA usage)...",

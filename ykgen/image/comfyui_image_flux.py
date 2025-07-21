@@ -121,7 +121,7 @@ class ComfyUIClient4Flux(ComfyUIImageClientBase):
             prompt["31"]["inputs"]["seed"] = self.lora_config["seed"]
         
         # Handle LoRA configuration
-        if not self.lora_config or self.lora_config.get("name") == "No LoRA":
+        if not self.lora_config or self.lora_config.get("name") == "No LoRA" or self.lora_config.get("mode") == "none":
             # No LoRA: Remove LoRA loader and FluxGuidance, connect directly to checkpoint
             del prompt["38"]  # Remove LoRA loader
             del prompt["39"]  # Remove FluxGuidance

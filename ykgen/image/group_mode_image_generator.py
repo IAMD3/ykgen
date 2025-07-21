@@ -252,6 +252,9 @@ def generate_images_for_scenes_adaptive(
             output_dir=output_dir,
             llm_provider=llm_provider
         )
+    elif lora_config.get("mode") == "none":
+        status_update("Detected none mode configuration - using base model only", "bright_cyan")
+        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
     else:
         status_update("Detected all mode configuration", "bright_green")
         return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
@@ -291,6 +294,9 @@ def generate_images_for_scenes_adaptive_optimized(
             output_dir=output_dir,
             llm_provider=llm_provider
         )
+    elif lora_config.get("mode") == "none":
+        status_update("Detected none mode configuration - using base model only", "bright_cyan")
+        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
     else:
         status_update("Detected all mode configuration", "bright_green")
         return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)

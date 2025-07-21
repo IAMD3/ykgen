@@ -190,6 +190,8 @@ Negative: "low quality, worst quality, normal quality, text, signature, jpeg art
 
 Scenes to process: {len(scenes)} scenes
 
+""" + "\n".join([f"Scene {i+1}:\n- Location: {scene.get('location', 'Unknown location')}\n- Time: {scene.get('time', 'Unknown time')}\n- Action: {scene.get('action', 'Unknown action')}\n- Characters: {', '.join([c.get('name', 'Unknown') for c in scene.get('characters', [])])}" for i, scene in enumerate(scenes)]) + f"""
+
 Generate prompts maintaining character and environment consistency across all scenes."""
 
         prompt = ChatPromptTemplate.from_messages(

@@ -1,4 +1,5 @@
-# KGen - AI Story & Video Generator
+# YKGen 
+##  AI Image & Video Generator
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 
@@ -8,26 +9,30 @@
 
 ## Introduction 
 
-KGen is a AI generation content tool that transforms simple text prompts into complete AI generated stories with images and videos , creating a consistent and steamless storytelling experience.
+```start
+I’ve tried many AI generation solutions, but most of them are either too complicated or not functional.While plainly using ComfyUI with complex workflows is too difficult and troublesome. That’s why I created YKGen — to simply combine ComfyUI with  LLM and code.
+```
+
+YKGen is an AI generation content tool that transforms simple text prompts into complete AI generated stories with images and videos , creating a consistent and steamless storytelling experience.
   * textual story generation
   * textual characters generation
   * textual scene generation
   * textual song lyrics generation
   * textual image prompt generation
   * image generation (comfyui) : support custom model and loras
-  * video generation (siliconflow api ,but wired quality)
+  * video generation (siliconflow api ,but wierd quality)
   * audio song generation with ACE TTS
   * consistant content (prompt, same seed, lora , etc)
-  * log all the related info for repeating regeneration
+  * log all the related info for reproduceable regeneration
   * "smart" lora selection (group mode, an extra llm call for selection)
 
 
 ### Interactive Mode
 
-The simplest way to use KGen is through its interactive CLI:
+The simplest way to use YKGen is through its interactive CLI:
 
 ```bash
-# Start KGen
+# Start YKGen
 uv run python main.py
 ```
 
@@ -42,7 +47,7 @@ The system will guide you through:
 
 ## ComfyUI Integration
 
-KGen relies on ComfyUI for high-quality image generation. ComfyUI setup requires downloading large AI models and proper configuration.
+YKGen relies on ComfyUI for high-quality image generation. ComfyUI setup requires downloading large AI models and proper configuration.
 
 **📖 Complete Setup Guide**: [ComfyUI Setup Guide](COMFYUI_SETUP.md)
 
@@ -53,18 +58,18 @@ The setup guide covers:
 - Performance optimization
 - Troubleshooting common issues
 
-**Quick Start**: Once ComfyUI is running on `http://127.0.0.1:8188`, KGen will automatically connect and use it for image generation.
+**Quick Start**: Once ComfyUI is running on `http://127.0.0.1:8188`, YKGen will automatically connect and use it for image generation.
 
 
 ## Technology Stack
 
-- **Language Models**: DeepSeek-R1 for story generation and creative tasks
+- **Language Models**: openai standard LLM for story generation and creative tasks
 - **Image Generation**: ComfyUI with Flux-Schnell (ultra-fast) or Illustrious-vPred (anime-style)
 - **Video Generation**: SiliconFlow (Wan2.1 I2V)
 - **Audio Synthesis**: ACE TTS for background music
 - **Package Management**: uv for modern Python dependency management
 - **Orchestration**: LangGraph for AI workflow management
-- **Video Processing**: FFmpeg for professional video assembly
+- **Video Processing**: FFmpeg for video assembly
 
 ## Installation
 
@@ -74,7 +79,7 @@ The setup guide covers:
 - [uv](https://docs.astral.sh/uv/) package manager
 - ComfyUI server with required models ([setup guide](COMFYUI_SETUP.md))
 - FFmpeg
-- API keys for DeepSeek and video providers (SiliconFlow)
+- API keys for LLM and video providers (SiliconFlow)
 
 
 ## Configuration
@@ -99,6 +104,14 @@ MAX_SCENES=3
 
 ## Agent Types
 
+### PureImageAgent
+Generates images only, with options:
+- Multiple images per scene (1-10)
+- Optional audio generation
+- Language selection for audio (English or Chinese)
+- Saves video prompts to text files for manual video creation
+- consistant images within a scene
+
 ### VideoAgent
 Creates complete video stories from text prompts:
 - Generates story with characters and scenes
@@ -115,33 +128,22 @@ Transforms Chinese poetry into visual experiences:
 - Creates videos with appropriate atmosphere
 - Adds traditional music with pinyin vocals
 
-### PureImageAgent
-Generates images only, with options:
-- Multiple images per scene (1-10)
-- Optional audio generation
-- Language selection for audio (English or Chinese)
-- Saves video prompts to text files for manual video creation
+
 
 ## LoRA Model Enhancement
 
-KGen supports LoRA models for specialized artistic styles:
+YKGen supports LoRA models for specialized artistic styles:
 
-### Flux-Schnell (Default)
-- Ultra-fast 4-step generation (~1-2 seconds per image)
-- 8 specialized LoRA options (pixel art, anime, watercolor, etc.)
-
-### Illustrious-vPred
-- High-quality anime/manga style generation
-- Character-specific LoRA for detailed anime visuals
 
 ### LoRA Selection Modes
 - **All Mode**: Apply all selected LoRAs to every image
 - **Group Mode**: AI intelligently selects appropriate LoRAs for each scene
+- **None Mode**: No LoRA applied
 
 ## Advanced Features
 
 ### Style Customization
-KGen does not apply any default style, allowing users full control:
+YKGen does not apply any default style, allowing users full control:
 - Specify style directly in your story prompt
 - The AI derives appropriate style from story content when not specified
 - Programmatically specify custom styles when using the API
@@ -160,10 +162,10 @@ KGen does not apply any default style, allowing users full control:
 
 ## Project Architecture
 
-KGen follows a clean, modular architecture:
+YKGen follows a clean, modular architecture:
 
 ```
-kgen/
+ykgen/
 ├── agents/           # AI Workflow Orchestration
 ├── audio/            # Audio Generation
 ├── config/           # Configuration Management
@@ -175,12 +177,22 @@ kgen/
 
 ## Image Generation Workflow
 
-KGen follows a sophisticated multi-step process to ensure high-quality, consistent image generation:
+YKGen follows a sophisticated multi-step process to ensure high-quality, consistent image generation:
 
 ### 1. Story Analysis & Scene Planning
 - AI analyzes your prompt to create a detailed story structure
 - Breaks down narrative into coherent scenes with character consistency
 - Generates optimized prompts for each scene
+
+#### Prompt Generation Examples
+
+YKGen transforms simple user prompts into detailed, optimized image generation prompts:
+
+![Prompt Generation Example 1](./example/prompt_generation_1.png)
+
+![Prompt Generation Example 2](./example/prompt_generation_2.png)
+
+These examples showcase how YKGen enhances basic story concepts with detailed visual descriptions, style specifications, and technical parameters for optimal image generation.
 
 ### 2. Style & LoRA Selection
 - Intelligent selection of appropriate LoRA models based on content
@@ -200,7 +212,7 @@ KGen follows a sophisticated multi-step process to ensure high-quality, consiste
 
 ## Image Consistency Solutions
 
-KGen employs multiple techniques to maintain visual consistency across generated content:
+YKGen employs multiple techniques to maintain visual consistency across generated content:
 
 ### Current Implementation
 - **LoRA Models**: Specialized style models ensure consistent artistic direction
@@ -224,7 +236,7 @@ Each generation creates a timestamped directory with:
 
 ## Next Stage Roadmap
 
-We're continuously improving KGen with exciting new features on the horizon:
+We're continuously improving YKGen with exciting new features on the horizon:
 
 ### 🎬 Enhanced Video Generation
 - **Keling AI Integration**: Automated video generation with Keling's advanced AI models
@@ -241,7 +253,7 @@ We're continuously improving KGen with exciting new features on the horizon:
 - **Enhanced Model Support**: Integration with latest AI models and techniques
 - **Smart Resource Management**: Better GPU memory utilization and batch processing
 
-*Stay tuned for these exciting developments that will make KGen even more powerful and user-friendly!*
+*Stay tuned for these exciting developments that will make YKGen even more powerful and user-friendly!*
 
 ## Development
 
@@ -253,15 +265,15 @@ uv run pytest
 uv run python tests/video_tester.py
 
 # Format code
-uv run black kgen/ tests/
-uv run isort kgen/ tests/
+uv run black ykgen/ tests/
+uv run isort ykgen/ tests/
 
 # Lint and check
-uv run ruff check kgen/ tests/
-uv run mypy kgen/
+uv run ruff check ykgen/ tests/
+uv run mypy ykgen/
 ```
 
 ## Links
 
-- [GitHub Repository](https://github.com/username/kgen)
-- [Issue Tracker](https://github.com/username/kgen/issues)
+- [GitHub Repository](https://github.com/username/ykgen)
+- [Issue Tracker](https://github.com/username/ykgen/issues)

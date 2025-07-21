@@ -425,6 +425,11 @@ between scenes in terms of characters and the poetic environment described."""
                 f"Generating images for {len(state['scenes'])} poetry scenes using {model_name} (Group Mode - Dynamic LoRA selection)...",
                 "bright_cyan",
             )
+        elif lora_mode == 'none':
+            status_update(
+                f"Generating images for {len(state['scenes'])} poetry scenes using {model_name} (None Mode - Base model only)...",
+                "bright_cyan",
+            )
         else:
             status_update(
                 f"Generating images for {len(state['scenes'])} poetry scenes using {model_name} (All Mode - Consistent LoRA usage)...",
@@ -536,6 +541,11 @@ between scenes in terms of characters and the poetic environment described."""
         if lora_mode == 'group':
             status_update(
                 f"Generating {total_images} images ({self.images_per_scene} per scene) for {len(state['scenes'])} poetry scenes using {model_name} (Group Mode - Dynamic LoRA selection)...",
+                "bright_cyan",
+            )
+        elif lora_mode == 'none':
+            status_update(
+                f"Generating {total_images} images ({self.images_per_scene} per scene) for {len(state['scenes'])} poetry scenes using {model_name} (None Mode - Base model only)...",
                 "bright_cyan",
             )
         else:

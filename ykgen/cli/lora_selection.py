@@ -34,11 +34,11 @@ class LoRASelectionHandler:
     
     def get_lora_config(self, model_type: str = "flux-schnell", lora_mode: str = "all") -> Optional[Dict[str, Any]]:
         """
-        Get user LoRA selection with support for 'all' and 'group' modes.
+        Get user LoRA selection with support for 'all', 'group', and 'none' modes.
         
         Args:
             model_type: The model type being used.
-            lora_mode: The LoRA mode ('all' or 'group').
+            lora_mode: The LoRA mode ('all', 'group', or 'none').
             
         Returns:
             Optional[Dict[str, Any]]: The LoRA configuration or None if selection fails.
@@ -63,6 +63,14 @@ class LoRASelectionHandler:
             elif lora_mode == "group":
                 # New behavior - select required and optional LoRAs
                 return self._get_lora_selection_group_mode(available_loras, model_type)
+            elif lora_mode == "none":
+                # No LoRA mode - return empty configuration
+                return {
+                    "mode": "none",
+                    "model_type": model_type,
+                    "loras": [],
+                    "trigger": ""
+                }
             else:
                 from ykgen.console import print_error
                 print_error(f"Unknown LoRA mode: {lora_mode}")

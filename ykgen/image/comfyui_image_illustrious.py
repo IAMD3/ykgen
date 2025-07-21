@@ -30,7 +30,7 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             "3": {
                 "inputs": {
                     "seed": None,  # Will be randomized
-                    "steps": 20,
+                    "steps": 26,
                     "cfg": 5,
                     "sampler_name": "euler_ancestral",
                     "scheduler": "normal",
@@ -152,16 +152,14 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             prompt["3"]["inputs"]["seed"] = self.lora_config["seed"]
 
         # Handle LoRA configuration
-        if not self.lora_config or self.lora_config.get("name") == "No LoRA":
-            # No LoRA: Remove LoRA loader and connect directly to checkpoint
+        if not self.lora_config or self.lora_config.get("name") == "No LoRA" or self.lora_config.get("mode") == "none":
+            # No LoRA: Remove LoRA loader and connect directly to RescaleCFG (node 47)
             del prompt["27"]  # Remove LoRA loader
-            del prompt["46"]  # Remove ModelSamplingDiscrete
-            del prompt["47"]  # Remove RescaleCFG
-            
-            # Reconnect nodes to bypass LoRA
+
+            # Reconnect nodes to bypass LoRA - connect to node 47 (RescaleCFG) instead of node 27
             prompt["6"]["inputs"]["clip"] = ["4", 1]  # Connect positive prompt to checkpoint
             prompt["7"]["inputs"]["clip"] = ["4", 1]  # Connect negative prompt to checkpoint
-            prompt["3"]["inputs"]["model"] = ["4", 0]  # Connect sampler to checkpoint
+            prompt["3"]["inputs"]["model"] = ["47", 0]  # Connect sampler to RescaleCFG (bypassing LoRA)
 
             # Set positive prompt as-is (no trigger words to add)
             prompt["6"]["inputs"]["text"] = positive_prompt
@@ -173,17 +171,15 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             if not active_loras:
                 # No active LoRAs, treat as no LoRA
                 del prompt["27"]
-                del prompt["46"]
-                del prompt["47"]
+
                 prompt["6"]["inputs"]["clip"] = ["4", 1]
                 prompt["7"]["inputs"]["clip"] = ["4", 1]
-                prompt["3"]["inputs"]["model"] = ["4", 0]
+                prompt["3"]["inputs"]["model"] = ["47", 0]  # Connect to RescaleCFG (node 47)
                 prompt["6"]["inputs"]["text"] = positive_prompt
             else:
                 # Remove the single LoRA loader and related nodes
                 del prompt["27"]
-                del prompt["46"]
-                del prompt["47"]
+
                 
                 # Create chain of LoRA loaders
                 last_model_output = ["4", 0]  # Start from checkpoint

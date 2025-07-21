@@ -140,6 +140,9 @@ class AgentFactory:
             if lora_config.get('mode') == 'group':
                 agent.lora_mode = 'group'
                 agent.group_config = lora_config
+            elif lora_config.get('mode') == 'none':
+                agent.lora_mode = 'none'
+                agent.group_config = None
             else:
                 agent.lora_mode = 'all'
                 agent.group_config = None

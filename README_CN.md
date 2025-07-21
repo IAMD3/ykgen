@@ -1,4 +1,4 @@
-# KGen - AI故事与视频生成器
+# YKGen - AI故事与视频生成器
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 
@@ -8,7 +8,10 @@
 
 ## 项目介绍
 
-KGen是一个AI生成内容工具，能够将简单的文本提示转换为完整的AI生成故事，包含图像和视频，创造一致且无缝的故事体验。
+我尝试过很多 AI GC方案，但大多数要么过于复杂，要么整合性较弱。如果直接使用 ComfyUI 并配合复杂的工作流，实在是太麻烦了。YKGen  —— 将 ComfyUI、LLM和代码简单地结合在一起。
+
+
+YKGen是一个AI生成内容工具，能够将简单的文本提示转换为完整的AI生成故事，包含图像和视频，创造一致且无缝的故事体验。
   * 文本故事生成
   * 文本角色生成
   * 文本场景生成
@@ -23,10 +26,10 @@ KGen是一个AI生成内容工具，能够将简单的文本提示转换为完�
 
 ### 交互模式
 
-使用KGen最简单的方式是通过其交互式CLI：
+使用YKGen最简单的方式是通过其交互式CLI：
 
 ```bash
-# 启动KGen
+# 启动YKGen
 uv run python main.py
 ```
 
@@ -39,7 +42,7 @@ uv run python main.py
 
 ## ComfyUI集成
 
-KGen依赖ComfyUI进行高质量图像生成。ComfyUI设置需要下载大型AI模型和正确配置。
+YKGen依赖ComfyUI进行高质量图像生成。ComfyUI设置需要下载大型AI模型和正确配置。
 
 **📖 完整设置指南**：[ComfyUI设置指南](COMFYUI_SETUP_CN.md)
 
@@ -50,7 +53,7 @@ KGen依赖ComfyUI进行高质量图像生成。ComfyUI设置需要下载大型AI
 - 性能优化
 - 常见问题故障排除
 
-**快速开始**：一旦ComfyUI在`http://127.0.0.1:8188`运行，KGen将自动连接并使用它进行图像生成。
+**快速开始**：一旦ComfyUI在`http://127.0.0.1:8188`运行，YKGen将自动连接并使用它进行图像生成。
 
 ## 技术栈
 
@@ -120,7 +123,7 @@ MAX_SCENES=3
 
 ## LoRA模型增强
 
-KGen支持用于专业艺术风格的LoRA模型：
+YKGen支持用于专业艺术风格的LoRA模型：
 
 ### Flux-Schnell（默认）
 - 超快4步生成（每张图像约1-2秒）
@@ -137,7 +140,7 @@ KGen支持用于专业艺术风格的LoRA模型：
 ## 高级功能
 
 ### 风格定制
-KGen不应用任何默认风格，允许用户完全控制：
+YKGen不应用任何默认风格，允许用户完全控制：
 - 在故事提示中直接指定风格
 - 当未指定时，AI从故事内容中推导适当的风格
 - 使用API时以编程方式指定自定义风格
@@ -156,10 +159,10 @@ KGen不应用任何默认风格，允许用户完全控制：
 
 ## 项目架构
 
-KGen遵循清晰的模块化架构：
+YKGen遵循清晰的模块化架构：
 
 ```
-kgen/
+ykgen/
 ├── agents/           # AI工作流编排
 ├── audio/            # 音频生成
 ├── config/           # 配置管理
@@ -171,12 +174,22 @@ kgen/
 
 ## 图像生成工作流程
 
-KGen遵循复杂的多步骤流程，确保高质量、一致的图像生成：
+YKGen遵循复杂的多步骤流程，确保高质量、一致的图像生成：
 
 ### 1. 故事分析与场景规划
 - AI分析您的提示以创建详细的故事结构
 - 将叙述分解为具有角色一致性的连贯场景
 - 为每个场景生成优化的提示
+
+#### 提示生成示例
+
+YKGen将简单的用户提示转换为详细、优化的图像生成提示：
+
+![提示生成示例 1](./example/prompt_generation_1.png)
+
+![提示生成示例 2](./example/prompt_generation_2.png)
+
+这些示例展示了YKGen如何通过详细的视觉描述、风格规范和技术参数来增强基本故事概念，以实现最佳的图像生成效果。
 
 ### 2. 风格与LoRA选择
 - 基于内容智能选择适当的LoRA模型
@@ -196,7 +209,7 @@ KGen遵循复杂的多步骤流程，确保高质量、一致的图像生成：
 
 ## 图像一致性解决方案
 
-KGen采用多种技术来保持生成内容的视觉一致性：
+YKGen采用多种技术来保持生成内容的视觉一致性：
 
 ### 当前实现
 - **LoRA模型**：专业风格模型确保一致的艺术方向
@@ -220,7 +233,7 @@ KGen采用多种技术来保持生成内容的视觉一致性：
 
 ## 下一阶段路线图
 
-我们正在不断改进KGen，即将推出令人兴奋的新功能：
+我们正在不断改进YKGen，即将推出令人兴奋的新功能：
 
 ### 🎬 增强视频生成
 - **Keling AI集成**：使用Keling先进AI模型的自动化视频生成
@@ -237,7 +250,7 @@ KGen采用多种技术来保持生成内容的视觉一致性：
 - **增强模型支持**：集成最新的AI模型和技术
 - **智能资源管理**：更好的GPU内存利用和批处理
 
-*敬请期待这些令人兴奋的发展，它们将使KGen更加强大和用户友好！*
+*敬请期待这些令人兴奋的发展，它们将使YKGen更加强大和用户友好！*
 
 ## 开发
 
@@ -249,15 +262,15 @@ uv run pytest
 uv run python tests/video_tester.py
 
 # 格式化代码
-uv run black kgen/ tests/
-uv run isort kgen/ tests/
+uv run black ykgen/ tests/
+uv run isort ykgen/ tests/
 
 # 检查和验证
-uv run ruff check kgen/ tests/
-uv run mypy kgen/
+uv run ruff check ykgen/ tests/
+uv run mypy ykgen/
 ```
 
 ## 链接
 
-- [GitHub仓库](https://github.com/username/kgen)
-- [问题跟踪器](https://github.com/username/kgen/issues)
+- [GitHub仓库](https://github.com/username/ykgen)
+- [问题跟踪器](https://github.com/username/ykgen/issues)
