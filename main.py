@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interactive KGen - AI Story & Video Generator
+Interactive YKGen - AI Story & Video Generator
 
 This script provides an interactive interface for users to:
 - Choose between VideoAgent (story generation) or PoetryAgent (Chinese poetry)
@@ -10,7 +10,7 @@ This script provides an interactive interface for users to:
 """
 
 import sys
-from kgen.cli import cli
+from ykgen.cli import cli
 
 if __name__ == "__main__":
     sys.exit(cli.main())

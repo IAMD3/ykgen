@@ -9,11 +9,11 @@ import sys
 import logging
 from pathlib import Path
 
-# Add the parent directory to the path so we can import kgen modules
+# Add the parent directory to the path so we can import ykgen modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from kgen.config.config import Config
-from kgen.video.siliconflow_client import VideoGenerationClient
+from ykgen.config.config import Config
+from ykgen.video.siliconflow_client import VideoGenerationClient
 
 def setup_logging():
     """Set up detailed logging"""
@@ -26,8 +26,8 @@ def setup_logging():
     )
     
     # Enable debug logging for our modules
-    logging.getLogger('kgen.video.siliconflow_client').setLevel(logging.DEBUG)
-    logging.getLogger('kgen.video.base_video_client').setLevel(logging.DEBUG)
+    logging.getLogger('ykgen.video.siliconflow_client').setLevel(logging.DEBUG)
+logging.getLogger('ykgen.video.base_video_client').setLevel(logging.DEBUG)
 
 def test_siliconflow_video_generation():
     """Test SiliconFlow video generation with an existing image"""

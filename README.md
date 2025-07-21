@@ -1,29 +1,26 @@
 # KGen - AI Story & Video Generator
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## Language / 语言
 
 - [English](README.md) | [中文](README_CN.md)
 
-## Introduction (I'v rewritted AI generated content manually)
+## Introduction 
 
-KGen is a AI generation content tool that transforms simple text prompts into complete AI generated images and video stories, creating a consistent and immersive storytelling experience.
+KGen is a AI generation content tool that transforms simple text prompts into complete AI generated stories with images and videos , creating a consistent and steamless storytelling experience.
+  * textual story generation
+  * textual characters generation
+  * textual scene generation
+  * textual song lyrics generation
+  * textual image prompt generation
+  * image generation (comfyui) : support custom model and loras
+  * video generation (siliconflow api ,but wired quality)
+  * audio song generation with ACE TTS
+  * consistant content (prompt, same seed, lora , etc)
+  * log all the related info for repeating regeneration
+  * "smart" lora selection (group mode, an extra llm call for selection)
 
-
-## Key Features
-
-- **Story Generation**: Creates rich narratives with characters and plot using openai standarad LLM
-- **Image Creation**: Generates consistent images through ComfyUI with Flux-Schnell or Illustrious-vPred
-- **Video Synthesis**: Converts images to fluid videos using SiliconFlow with Wan2.1 I2V (but wired quality)
-- **Song generation**: Creates background music and voice narration with ACE TTS (somehow not too bade)
-- **Multiple Generation Modes**: Supports video stories, poetry visualization, and pure image generation
-- **Style Customization**: Enhanced image generation with various artistic styles through LoRA models
-
-## Usage
-
-KGen offers multiple ways to generate content based on your needs:
 
 ### Interactive Mode
 
@@ -36,120 +33,28 @@ uv run python main.py
 
 The system will guide you through:
 1. Selecting an agent type (VideoAgent, PoetryAgent, or PureImageAgent)
-2. Choosing a video provider (SiliconFlow)
+2. Choosing a video provider if you choose video agent  (SiliconFlow)
 3. Selecting LoRA models for image style enhancement
 4. Entering your creative prompt
 5. Watching the generation process with real-time progress display
 
-### Programmatic Usage
 
-For more advanced use cases, KGen can be integrated into your Python projects:
-
-#### Video Story Generation
-```python
-from kgen import VideoAgent
-
-# Create agent (uses LLM configuration from environment)
-agent = VideoAgent(
-    enable_audio=True,
-    video_provider="siliconflow"
-)
-
-result = agent.generate("A brave knight's quest to save a magical kingdom")
-```
-
-#### Poetry Visualization
-```python
-from kgen import PoetryAgent
-
-# Create agent (uses LLM configuration from environment)
-agent = PoetryAgent(
-    enable_audio=True,
-    video_provider="siliconflow"
-)
-
-poetry = """观沧海》——曹操：东临碣石，以观沧海。水何澹澹，山岛竦峙。
-树木丛生，百草丰茂。秋风萧瑟，洪波涌起。日月之行，若出其中；
-星汉灿烂，若出其里。幸甚至哉，歌以咏志。"""
-
-result = agent.generate(poetry)
-```
-
-#### Pure Image Generation
-```python
-from kgen import PureImageAgent
-
-# Create agent (uses LLM configuration from environment)
-agent = PureImageAgent(
-    enable_audio=False,
-    images_per_scene=3  # Generate 3 images per scene
-)
-
-result = agent.generate("A mystical underwater city with glowing coral towers")
-```
 
 ## ComfyUI Integration
 
-KGen relies on ComfyUI for high-quality image generation. Follow these steps to set up ComfyUI for use with KGen:
+KGen relies on ComfyUI for high-quality image generation. ComfyUI setup requires downloading large AI models and proper configuration.
 
-### 1. Install ComfyUI
+**📖 Complete Setup Guide**: [ComfyUI Setup Guide](COMFYUI_SETUP.md)
 
-```bash
-# Clone ComfyUI repository
-git clone https://github.com/comfyanonymous/ComfyUI.git
-cd ComfyUI
+The setup guide covers:
+- ComfyUI installation and configuration
+- Required model downloads (Flux-Schnell, Illustrious-vPred)
+- LoRA model setup for enhanced styles
+- Performance optimization
+- Troubleshooting common issues
 
-# Install dependencies
-pip install -r requirements.txt
-```
+**Quick Start**: Once ComfyUI is running on `http://127.0.0.1:8188`, KGen will automatically connect and use it for image generation.
 
-### 2. Download Required Models
-
-Download the AI models and place them in the appropriate directories:
-
-#### Main Models (Required)
-
-```bash
-# Create the checkpoints directory if it doesn't exist
-mkdir -p models/checkpoints/
-```
-
-**Flux-Schnell Model** (Ultra-fast generation):
-- Download from: [Hugging Face - FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell)
-- File: `flux1-schnell-fp8.safetensors`
-- Place in: `models/checkpoints/`
-
-**Illustrious-vPred Model** (High-quality anime/manga style):
-- Download from: [CivitAI - NoobAI-XL](https://civitai.com/models/833294/noobai-xl-nai-xl)
-- File: Model checkpoint file (`.safetensors`)
-- Place in: `models/checkpoints/`
-
-**WAI NSFW Illustrious Model** (Alternative anime model):
-- Download from: [CivitAI - WAI-NSFW-illustrious-SDXL](https://civitai.com/models/827184/wai-nsfw-illustrious-sdxl)
-- File: Model checkpoint file (`.safetensors`)
-- Place in: `models/checkpoints/`
-
-### 3. Download LoRA Models (Optional but Recommended)
-
-For enhanced artistic styles, download LoRA models and place them in the LoRA directory:
-
-```bash
-# Create the LoRA directory
-mkdir -p models/loras/
-
-# Download LoRA models from Hugging Face, CivitAI, or other sources
-```
-
-### 4. Start ComfyUI Server
-
-```bash
-# Start ComfyUI with API enabled
-python main.py --listen 127.0.0.1 --port 8188
-```
-
-The server should be accessible at `http://127.0.0.1:8188`
-
-For detailed ComfyUI setup instructions, refer to the [ComfyUI Setup Guide](COMFYUI_SETUP.md).
 
 ## Technology Stack
 
@@ -171,18 +76,6 @@ For detailed ComfyUI setup instructions, refer to the [ComfyUI Setup Guide](COMF
 - FFmpeg
 - API keys for DeepSeek and video providers (SiliconFlow)
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd kgen
-
-# Install dependencies
-uv sync
-
-# Set up environment
-cp env.example .env
-# Edit .env with your API keys
-```
 
 ## Configuration
 
@@ -297,7 +190,7 @@ KGen follows a sophisticated multi-step process to ensure high-quality, consiste
 ### 3. Image Generation Process
 - **Seed Management**: Uses consistent seeds for character/style continuity
 - **Prompt Engineering**: Enhanced prompts with style triggers and quality tags
-- **Model Selection**: Automatic choice between Flux-Schnell, Illustrious-vPred, or WAI models
+- **Model Selection**: Automatic choice between Flux-Schnell and Illustrious-vPred models
 - **Quality Control**: Built-in retry mechanism for failed generations
 
 ### 4. Post-Processing & Assembly
@@ -370,6 +263,5 @@ uv run mypy kgen/
 
 ## Links
 
-- [ComfyUI Setup Guide](COMFYUI_SETUP.md)
 - [GitHub Repository](https://github.com/username/kgen)
 - [Issue Tracker](https://github.com/username/kgen/issues)

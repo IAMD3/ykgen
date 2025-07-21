@@ -1,212 +1,249 @@
 # ComfyUI Setup Guide for KGen
 
-This guide will help you set up ComfyUI for image generation in KGen using Flux models.
+This guide will help you set up ComfyUI for use with KGen's image generation capabilities. ComfyUI is essential for high-quality image generation in KGen.
+
+## Overview
+
+KGen supports two main image generation models through ComfyUI:
+- **Flux-Schnell**: Ultra-fast generation (1-2 seconds per image)
+- **Illustrious-vPred**: High-quality anime/manga style generation
 
 ## Prerequisites
 
 - Python 3.8 or higher
-- NVIDIA GPU with at least 8GB VRAM (recommended for Flux)
 - Git
+- At least 8GB of GPU VRAM (recommended: 12GB+)
+- Sufficient disk space for models (~20GB+)
 
-## Installation Steps
+## Step 1: Install ComfyUI
 
-### 1. Install ComfyUI
+### Clone and Setup ComfyUI
 
 ```bash
-# Clone ComfyUI repository
+# Clone the ComfyUI repository
 git clone https://github.com/comfyanonymous/ComfyUI.git
 cd ComfyUI
 
-# Install dependencies
+# Install Python dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Download Flux Model
+### Alternative Installation Methods
 
-Download the Flux model file `flux1-schnell-fp8.safetensors` and place it in the `models/checkpoints/` directory:
-
+**Using conda:**
 ```bash
-# Create the checkpoints directory if it doesn't exist
+conda create -n comfyui python=3.10
+conda activate comfyui
+pip install -r requirements.txt
+```
+
+**Using virtual environment:**
+```bash
+python -m venv comfyui_env
+source comfyui_env/bin/activate  # On Windows: comfyui_env\Scripts\activate
+pip install -r requirements.txt
+```
+
+## Step 2: Download Required Models
+
+### Main Models (Required)
+
+Create the checkpoints directory if it doesn't exist:
+```bash
 mkdir -p models/checkpoints/
-
-# Download Flux model (you'll need to get this from Hugging Face or other sources)
-# Example: huggingface-cli download black-forest-labs/FLUX.1-schnell flux1-schnell-fp8.safetensors --local-dir models/checkpoints/
 ```
 
-### 3. Download LoRA Models (Optional but Recommended)
+#### Flux-Schnell Model (Ultra-fast generation)
 
-KGen supports LoRA models for enhanced artistic styles. Create the LoRA directory and download the models:
+**Download Options:**
+1. **Direct Download**: [Hugging Face - FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell)
+2. **Using git-lfs**:
+   ```bash
+   cd models/checkpoints/
+   git lfs clone https://huggingface.co/black-forest-labs/FLUX.1-schnell
+   ```
 
+**Required File:**
+- `flux1-schnell-fp8.safetensors`
+- **Size**: ~23GB
+- **Place in**: `models/checkpoints/`
+
+#### Illustrious-vPred Model (High-quality anime/manga style)
+
+**Download from**: [CivitAI - NoobAI-XL](https://civitai.com/models/833294/noobai-xl-nai-xl)
+
+**Required File:**
+- `noobaiXLNAIXL_vPred10Version.safetensors`
+- **Size**: ~6.6GB
+- **Place in**: `models/checkpoints/`
+
+### Additional Required Components
+
+#### VAE Models
+Some models may require specific VAE files. Download if needed:
 ```bash
-# Create the LoRA directory
+mkdir -p models/vae/
+# Download VAE files as required by your specific models
+```
+
+#### CLIP Models
+Ensure CLIP models are available:
+```bash
+mkdir -p models/clip/
+# CLIP models are usually included with main models
+```
+
+## Step 3: Download LoRA Models (Optional but Recommended)
+
+LoRA models enhance image generation with specific artistic styles.
+
+### Setup LoRA Directory
+```bash
 mkdir -p models/loras/
-
-# Download LoRA models (you'll need to get these from Hugging Face, CivitAI, or other sources)
-# Place the following files in models/loras/:
 ```
 
-**Available LoRA Models for KGen:**
+### Recommended LoRA Sources
+- [Hugging Face LoRA Collection](https://huggingface.co/models?other=lora)
+- [CivitAI LoRA Models](https://civitai.com/models?type=LORA)
 
-| Model File | Style | Trigger Words | Source |
-|------------|--------|---------------|---------|
-| `HEZI_F.1竖版像素游戏风格_v5.0.safetensors` | Pixel Game Style | `HEZI` | CivitAI/Hugging Face |
-| `pixel-art-flux-v3-learning-rate-4.safetensors` | Modern Pixel Art | `pixel art` | CivitAI/Hugging Face |
-| `pixelart_schnell_v1.safetensors` | Fast Pixel Art | `pixel art` | CivitAI/Hugging Face |
-| `flux_illustriousXL_schnell_v1-rev2.safetensors` | Anime Illustration | `illustrious style` | CivitAI/Hugging Face |
-| `pvc-shnell-7250+7500.safetensors` | PVC Figure Style | `pvc figure, figma` | CivitAI/Hugging Face |
-| `watercolor_schnell_v1.safetensors` | Watercolor Painting | `watercolor painting` | CivitAI/Hugging Face |
-| `hinaFluxAsianMixLora-schnell_v4-rev2.safetensors` | Asian Portrait Style | `Asian girl` | CivitAI/Hugging Face |
+### Popular LoRA Categories
+- **Art Styles**: Watercolor, oil painting, pixel art
+- **Character Styles**: Anime, realistic, cartoon
+- **Photography**: Portrait, landscape, macro
+- **Themes**: Fantasy, sci-fi, historical
 
-**Final LoRA Directory Structure:**
-```
-ComfyUI/models/loras/
-├── HEZI_F.1竖版像素游戏风格_v5.0.safetensors
-├── pixel-art-flux-v3-learning-rate-4.safetensors
-├── pixelart_schnell_v1.safetensors
-├── flux_illustriousXL_schnell_v1-rev2.safetensors
-├── pvc-shnell-7250+7500.safetensors
-├── watercolor_schnell_v1.safetensors
-└── hinaFluxAsianMixLora-schnell_v4-rev2.safetensors
+## Step 4: Configure ComfyUI
+
+### Basic Configuration
+
+Create a configuration file (optional):
+```bash
+# Create config file
+touch extra_model_paths.yaml
 ```
 
-### 4. Required ComfyUI Nodes
+Example configuration:
+```yaml
+comfyui:
+    base_path: /path/to/ComfyUI/
+    checkpoints: models/checkpoints/
+    vae: models/vae/
+    loras: models/loras/
+    clip: models/clip/
+```
 
-Make sure you have the following nodes installed (they should be available by default):
+## Step 5: Start ComfyUI Server
 
-**Basic Nodes:**
-- `CLIPTextEncode`
-- `VAEDecode` 
-- `SaveImage`
-- `EmptySD3LatentImage`
-- `CheckpointLoaderSimple`
-- `KSampler`
-
-**LoRA Enhancement Nodes:**
-- `LoraLoader` (for LoRA model loading)
-- `FluxGuidance` (for enhanced prompt guidance)
-
-These additional nodes are typically included with ComfyUI by default, but if missing, you may need to update ComfyUI or install additional node packs.
-
-### 5. Start ComfyUI Server
-
+### Basic Startup
 ```bash
 # Start ComfyUI with API enabled
 python main.py --listen 127.0.0.1 --port 8188
 ```
 
-The server should start and be accessible at `http://127.0.0.1:8188`
+### Advanced Startup Options
+```bash
+# With specific GPU and memory settings
+python main.py --listen 127.0.0.1 --port 8188 --gpu-only --highvram
 
-## Verification
+# For low VRAM systems
+python main.py --listen 127.0.0.1 --port 8188 --lowvram
 
-### Test ComfyUI Connection
-
-You can test if ComfyUI is running properly by visiting `http://127.0.0.1:8188` in your browser. You should see the ComfyUI interface.
-
-### Test with KGen
-
-```python
-from kgen.comfyui import ComfyUIClient
-
-# Test connection
-client = ComfyUIClient()
-print("ComfyUI client initialized successfully!")
+# For CPU-only mode (very slow)
+python main.py --listen 127.0.0.1 --port 8188 --cpu
 ```
 
-### Test LoRA Functionality
+### Verify Installation
 
-```python
-from kgen import VideoAgent
+Once started, ComfyUI should be accessible at:
+- **Web Interface**: `http://127.0.0.1:8188`
+- **API Endpoint**: `http://127.0.0.1:8188/api`
 
-# Test with a LoRA model
-lora_config = {
-    "name": "Watercolor Schnell",
-    "file": "watercolor_schnell_v1.safetensors",
-    "trigger": "watercolor painting"
-}
+## Step 6: Test Integration with KGen
 
-try:
-    agent = VideoAgent(lora_config=lora_config)
-    print("✅ LoRA configuration loaded successfully!")
-    print(f"   LoRA: {lora_config['name']}")
-    print(f"   Trigger: {lora_config['trigger']}")
-except Exception as e:
-    print(f"❌ LoRA test failed: {e}")
-```
+### Verify Connection
+1. Ensure ComfyUI is running
+2. Check that KGen can connect to ComfyUI
+3. Test image generation with a simple prompt
 
-## Configuration
-
-### Default Settings
-
-KGen uses the following default Flux configuration:
-
-- **Model**: `flux1-schnell-fp8.safetensors`
-- **Resolution**: 1024x1024
-- **Steps**: 4
-- **Sampler**: Euler
-- **Scheduler**: Simple
-- **CFG**: 1.0 (Negative prompts ignored)
-
-### Custom Configuration
-
-You can customize the ComfyUI server address when initializing the client:
-
-```python
-from kgen.comfyui import ComfyUIClient
-
-# Custom server address
-client = ComfyUIClient(server_address="192.168.1.100:8188")
+### Configuration in KGen
+Ensure your `.env` file contains:
+```env
+COMFYUI_HOST=127.0.0.1
+COMFYUI_PORT=8188
 ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Connection Refused**
-   - Make sure ComfyUI server is running
-   - Check that the port 8188 is not blocked by firewall
-   - Verify the server address is correct
+**1. Out of Memory Errors**
+- Use `--lowvram` or `--cpu` flags
+- Reduce batch size in KGen settings
+- Close other GPU-intensive applications
 
-2. **Model Not Found**
-   - Ensure `flux1-schnell-fp8.safetensors` is in the `models/checkpoints/` directory
-   - Check file permissions
+**2. Model Loading Errors**
+- Verify model files are complete and not corrupted
+- Check file permissions
+- Ensure sufficient disk space
 
-3. **Out of Memory Errors**
-   - Reduce image resolution
-   - Close other GPU-intensive applications
-   - Consider using a smaller Flux model variant
+**3. Connection Issues**
+- Verify ComfyUI is running on the correct port
+- Check firewall settings
+- Ensure no other services are using port 8188
 
-4. **Slow Generation**
-   - Flux Schnell is optimized for speed and should generate images much faster than Flux Dev
-   - Each image typically takes 30-60 seconds depending on hardware
+**4. Slow Generation**
+- Use Flux-Schnell for faster generation
+- Enable GPU acceleration
+- Optimize ComfyUI startup parameters
 
-5. **LoRA Model Issues**
-   - If LoRA models aren't loading, check they're in the `models/loras/` directory
-   - Ensure LoRA file names match exactly what KGen expects
-   - LoRA models require additional VRAM (consider reducing other settings if memory errors occur)
-   - If LoRA effects aren't visible, verify the model is compatible with Flux
+### Performance Optimization
 
-### Debug Mode
-
-Enable debug logging in KGen:
-
-```python
-import logging
-logging.basicConfig(level=logging.DEBUG)
+**For High-End Systems (12GB+ VRAM):**
+```bash
+python main.py --listen 127.0.0.1 --port 8188 --gpu-only --highvram
 ```
 
-## Performance Tips
+**For Mid-Range Systems (6-12GB VRAM):**
+```bash
+python main.py --listen 127.0.0.1 --port 8188 --gpu-only
+```
 
-1. **GPU Memory**: Flux models require significant GPU memory. 8GB+ VRAM recommended.
-2. **Generation Time**: Flux Schnell is much faster - each image takes 30-60 seconds depending on your hardware.
-3. **Batch Processing**: KGen processes scenes sequentially to avoid memory issues.
-4. **Speed Advantage**: Flux Schnell is a distilled model that can generate good quality images with only 4 steps.
+**For Low-End Systems (<6GB VRAM):**
+```bash
+python main.py --listen 127.0.0.1 --port 8188 --lowvram
+```
 
-## Alternative Models
+## Directory Structure
 
-If Flux is too resource-intensive, you can modify the workflow in `kgen/comfyui.py` to use other models:
+After setup, your ComfyUI directory should look like:
+```
+ComfyUI/
+├── models/
+│   ├── checkpoints/
+│   │   ├── flux1-schnell-fp8.safetensors
+│   │   └── noobaiXLNAIXL_vPred10Version.safetensors
+│   ├── loras/
+│   │   └── [your LoRA files]
+│   ├── vae/
+│   └── clip/
+├── main.py
+├── requirements.txt
+└── [other ComfyUI files]
+```
 
-- SDXL models
-- Stable Diffusion 1.5
-- Other diffusion models supported by ComfyUI
+## Next Steps
 
-Just update the `ckpt_name` in the `flux_workflow_template` and adjust other parameters as needed.
+Once ComfyUI is set up and running:
+1. Return to the main KGen documentation
+2. Configure your `.env` file with API keys
+3. Start generating amazing content with KGen!
+
+## Support
+
+For ComfyUI-specific issues:
+- [ComfyUI GitHub Repository](https://github.com/comfyanonymous/ComfyUI)
+- [ComfyUI Documentation](https://github.com/comfyanonymous/ComfyUI#readme)
+
+For KGen integration issues:
+- Check the main KGen documentation
+- Review the troubleshooting section above

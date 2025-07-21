@@ -7,7 +7,7 @@ def test_poetry_agent_pure_image():
     """Test that PoetryAgent can be instantiated with pure image mode."""
     try:
         # Import the necessary modules
-        from kgen import PoetryAgent
+        from ykgen import PoetryAgent
         
         print("✓ Successfully imported PoetryAgent")
         

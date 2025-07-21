@@ -11,9 +11,9 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from kgen import ComfyUIAudioClient
-from kgen import generate_song_lyrics, generate_music_tags
-from kgen.providers import get_llm
+from ykgen import ComfyUIAudioClient
+from ykgen import generate_song_lyrics, generate_music_tags
+from ykgen.providers import get_llm
 
 
 def test_audio_generation():

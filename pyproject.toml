@@ -1,5 +1,5 @@
 [project]
-name = "kgen"
+name = "ykgen"
 version = "0.1.0"
 description = "AI-powered story and video generation using LangChain and LangGraph"
 authors = [

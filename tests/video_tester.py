@@ -13,13 +13,13 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from kgen import VideoGenerationClient
+from ykgen import VideoGenerationClient
 
 
 def test_video_generation():
     """Test video generation with a sample image."""
     # Get API key from config
-    from kgen.config.config import config
+    from ykgen.config.config import config
     api_key = config.SILICONFLOW_VIDEO_KEY
     
     if not api_key:
@@ -91,7 +91,7 @@ def test_video_generation():
 
 def test_async_generation():
     """Test asynchronous video generation."""
-    from kgen.config.config import config
+    from ykgen.config.config import config
     api_key = config.SILICONFLOW_VIDEO_KEY
     
     if not api_key:

@@ -11,7 +11,7 @@ from pathlib import Path
 # Add the kgen package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from kgen.agents import VideoAgent
+from ykgen.agents import VideoAgent
 
 
 def test_all_mode():

@@ -9,8 +9,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from kgen import PoetryAgent
-from kgen.console import print_banner, print_prompt, print_info, print_success, print_error
+from ykgen import PoetryAgent
+from ykgen.console import print_banner, print_prompt, print_info, print_success, print_error
 
 
 def test_poetry_agent():

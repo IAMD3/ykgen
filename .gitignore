@@ -54,6 +54,7 @@ venv.bak/
 # IDEs
 .vscode/
 .idea/
+.cursor/
 *.swp
 *.swo
 *~
@@ -139,4 +140,4 @@ dmypy.json
 # uv.lock
 
 # Ruff
-.ruff_cache/ 
+.ruff_cache/

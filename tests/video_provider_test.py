@@ -9,17 +9,17 @@ for video generation from the terminal.
 import sys
 from pathlib import Path
 
-# Add parent directory to path so we can import kgen modules
+# Add parent directory to path so we can import ykgen modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from kgen.video.client_factory import (
+from ykgen.video.client_factory import (
     create_video_client,
     get_video_provider_info,
     validate_video_provider_config,
     get_supported_providers,
     get_configured_providers,
 )
-from kgen.console import print_info, print_success, print_warning, print_error
+from ykgen.console import print_info, print_success, print_warning, print_error
 
 
 def test_video_provider_info():
