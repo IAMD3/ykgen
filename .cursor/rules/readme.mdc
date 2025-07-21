@@ -1,0 +1,5 @@
+---
+description: always refer readme and uptate it accordingly
+globs:
+alwaysApply: false
+---

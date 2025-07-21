@@ -1,0 +1,117 @@
+[project]
+name = "kgen"
+version = "0.1.0"
+description = "AI-powered story and video generation using LangChain and LangGraph"
+authors = [
+    {name = "KGen Team", email = "kgen@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+keywords = ["ai", "llm", "video-generation", "story-generation", "langchain", "comfyui"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Multimedia :: Video",
+]
+dependencies = [
+    "langchain>=0.3.26",
+    "langchain-core>=0.3.67",
+    "langchain-community>=0.3.26",
+    "langchain-openai>=0.3.27",
+    "langgraph>=0.2.50",
+    "openai>=1.93.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+    "websocket-client>=1.8.0",
+    "requests>=2.31.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "ruff>=0.1.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/kgen"
+Repository = "https://github.com/your-org/kgen"
+Documentation = "https://github.com/your-org/kgen#readme"
+"Bug Tracker" = "https://github.com/your-org/kgen/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C408",  # unnecessary dict call
+]
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+strict_optional = true
+warn_redundant_casts = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+asyncio_default_fixture_loop_scope = "function"
