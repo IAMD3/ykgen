@@ -482,7 +482,7 @@ Requirements:
 6. Each prompt should be suitable for high-quality image generation
 7. Format each prompt as a comma-separated list of descriptors
 
-important: if you generate the prompt related to a character, the character must be detailed described including the haircut, face description, body description, eye, etc(other detailed description), for the consistency of the character description in the prompt within a scene
+important: if you generate the prompt related to a character, the character must be detailed described including the haircut, face description, body description, eye, etc(other detailed description), for the consistency of the character description in the prompt within a scene. The length of each prompt would be better within 100 tokens.
 
 Return the prompts using the ScenePrompts tool."""
 
