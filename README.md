@@ -234,6 +234,18 @@ Each generation creates a timestamped directory with:
 - Background audio
 - Final combined video
 
+### Sample Generated Images(within a scene)
+
+**Scene 001 - Image 01:**
+![Scene 001 Image 01](./example/scene_001_image_01.png)
+
+*generated prompt:* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, viewed from a low angle to emphasize speed and height, backpack bouncing mid-air, phone buzzing in her pocket, golden retriever leaping into the frame, sidewalk with morning light casting long shadows, urban setting, determined expression, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, motion blur on her legs, mid-action freeze`
+
+**Scene 001 - Image 02:**
+![Scene 001 Image 02](./example/scene_001_image_02.png)
+
+*generated prompt:* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, close-up side view, focusing on her determined face and the phone buzzing in her pocket, backpack straps loose and flying, golden retriever in the background blurred, sidewalk with crisp autumn leaves scattering, urban setting, morning light warming the scene, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, shallow depth of field`
+
 ## Next Stage Roadmap
 
 We're continuously improving YKGen with exciting new features on the horizon:

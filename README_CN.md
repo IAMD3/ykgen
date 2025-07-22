@@ -231,6 +231,18 @@ YKGen采用多种技术来保持生成内容的视觉一致性：
 - 背景音频
 - 最终合并的视频
 
+### 生成图像示例(同一场景)
+
+**场景 001 - 图像 01：**
+![场景 001 图像 01](./example/scene_001_image_01.png)
+
+*提示词：* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, viewed from a low angle to emphasize speed and height, backpack bouncing mid-air, phone buzzing in her pocket, golden retriever leaping into the frame, sidewalk with morning light casting long shadows, urban setting, determined expression, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, motion blur on her legs, mid-action freeze`
+
+**场景 001 - 图像 02：**
+![场景 001 图像 02](./example/scene_001_image_02.png)
+
+*提示词：* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, close-up side view, focusing on her determined face and the phone buzzing in her pocket, backpack straps loose and flying, golden retriever in the background blurred, sidewalk with crisp autumn leaves scattering, urban setting, morning light warming the scene, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, shallow depth of field`
+
 ## 下一阶段路线图
 
 我们正在不断改进YKGen，即将推出令人兴奋的新功能：

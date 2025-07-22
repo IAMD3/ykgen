@@ -111,7 +111,6 @@ logs/
 *.wav
 *.mp3
 *.flac
-*.png
 *.jpg
 *.jpeg
 *.gif

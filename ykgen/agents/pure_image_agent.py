@@ -110,7 +110,7 @@ Output ONLY the formatted pinyin, no explanations."""
         )
 
         story_prompt = f"""Write a story based on the following prompt. Your story should be engaging and creative, and should be between 100 and 300 words.
-        Do not provide any explanations or text apart from the story, the story must be written in english.
+        Do not provide any explanations or text apart from the story, the story must be written in english, the story must be interesting and attractive ,also blends modern internet culture .
         Prompt: {state['prompt'].content}"""
 
         prompt = ChatPromptTemplate.from_messages(
@@ -445,7 +445,19 @@ Output ONLY the formatted pinyin, no explanations."""
             "Your task is to create multiple variations of a prompt while keeping character descriptions consistent."
         )
 
-        prompt_template = f"""Generate {self.images_per_scene} different image generation prompts for the same scene.
+        # Build LoRA context
+        lora_context = ""
+        if self.lora_config:
+            if self.lora_config.get("mode") == "group":
+                trigger_words = self.lora_config.get("required_trigger", "")
+                if trigger_words:
+                    lora_context = f"IMPORTANT: You MUST include these essential trigger words in EVERY positive prompt: '{trigger_words}'. These are required for the required LoRA models to work properly."
+            else:
+                trigger_words = self.lora_config.get("trigger", "")
+                if trigger_words and self.lora_config.get("name", "No LoRA") != "No LoRA":
+                    lora_context = f"IMPORTANT: You MUST include these essential trigger words in EVERY positive prompt: '{trigger_words}'. These are required for the LoRA model '{self.lora_config['name']}' to work properly."
+
+        prompt_template = f"""Generate {self.images_per_scene} different image generation prompts for the same scene, if there are two or more  images per scene, make sure the first image and the last image of each scene can be combined into the opening and ending frames .
 
 Scene details:
 - Location: {scene.get('location', 'Unknown location')}
@@ -458,6 +470,8 @@ Original prompt:
 
 Character descriptions to preserve in ALL prompts:
 {character_desc_text}
+
+LoRA Context: {lora_context}
 
 Requirements:
 1. Create {self.images_per_scene} distinct prompts that describe the same scene but with different perspectives, angles, or focus
