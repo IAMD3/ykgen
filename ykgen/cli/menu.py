@@ -9,6 +9,8 @@ from typing import Optional, Dict, List, Any, Union
 from rich.panel import Panel
 from rich.text import Text
 from rich import box
+import json
+from pathlib import Path
 
 from ykgen.console.display import console
 from ykgen.config import config
@@ -166,24 +168,97 @@ class VideoProviderMenu(Menu):
 class ModelSelectionMenu(Menu):
     """Menu for selecting the image generation model."""
     
+    def __init__(self):
+        """Initialize the menu and load available models."""
+        self.models = self._load_available_models()
+        self.model_mapping = self._create_model_mapping()
+    
+    def _load_available_models(self) -> Dict[str, List[Dict[str, Any]]]:
+        """Load available models from image_model_config.json."""
+        config_path = Path(__file__).parent.parent / "config" / "image_model_config.json"
+        
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            return config
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            # Fallback to hardcoded models if config file is not available
+            return {
+                "simple": {
+                    "models": [
+                        {
+                            "name": "Flux Schnell",
+                            "description": "Ultra-fast 4-step generation",
+                            "lora_config_key": "flux-schnell",
+                            "default": True
+                        }
+                    ]
+                },
+                "vpred": {
+                    "models": [
+                        {
+                            "name": "Illustrious vPred", 
+                            "description": "High-quality anime/manga style",
+                            "lora_config_key": "illustrious-vpred",
+                            "default": True
+                        }
+                    ]
+                }
+            }
+    
+    def _create_model_mapping(self) -> Dict[str, Dict[str, str]]:
+        """Create a mapping from choice numbers to model info."""
+        mapping = {}
+        choice_num = 1
+        
+        for category, category_data in self.models.items():
+            if "models" in category_data:
+                for model in category_data["models"]:
+                    mapping[str(choice_num)] = {
+                        "name": model.get("name", "Unknown Model"),
+                        "category": category,
+                        "lora_config_key": model.get("lora_config_key", "flux-schnell"),
+                        "description": model.get("description", ""),
+                        "is_default": model.get("default", False)
+                    }
+                    choice_num += 1
+        
+        return mapping
+    
     def display(self) -> None:
         """Display the model selection menu."""
         model_text = Text()
         model_text.append("Choose an image generation model:\n\n", style="bold bright_cyan")
         model_text.append("Available Models:\n", style="bold white")
-        model_text.append("  1. ", style="bright_yellow")
-        model_text.append("Flux-Schnell", style="yellow")
-        model_text.append(" (default) - Ultra-fast 4-step generation with multiple LoRA options\n", style="white")
-        model_text.append("  2. ", style="bright_yellow")
-        model_text.append("Illustrious-vPred", style="yellow")
-        model_text.append(" - High-quality anime/manga style with Elena Kimberlite character LoRA\n", style="white")
-
-        model_text.append("\nModel Characteristics:\n", style="bold white")
-        model_text.append("  • Flux-Schnell: ", style="bright_blue")
-        model_text.append("Fast generation, versatile styles, 8 LoRA options\n", style="white")
-        model_text.append("  • Illustrious-vPred: ", style="bright_magenta")
-        model_text.append("Anime/manga focus, character consistency, v-prediction model\n", style="white")
-
+        
+        # Display all available models
+        for choice_num, model_info in self.model_mapping.items():
+            model_text.append(f"  {choice_num}. ", style="bright_yellow")
+            model_text.append(model_info["name"], style="yellow")
+            
+            if model_info["is_default"]:
+                model_text.append(" (default)", style="bright_green")
+            
+            if model_info["description"]:
+                model_text.append(f" - {model_info['description']}", style="white")
+            
+            model_text.append("\n", style="white")
+        
+        # Display model characteristics if we have multiple models
+        if len(self.model_mapping) > 1:
+            model_text.append("\nModel Characteristics:\n", style="bold white")
+            for choice_num, model_info in self.model_mapping.items():
+                model_text.append(f"  • {model_info['name']}: ", style="bright_blue")
+                
+                # Add category-specific descriptions
+                if model_info["category"] == "simple":
+                    model_text.append("Fast generation, versatile styles", style="white")
+                elif model_info["category"] == "vpred":
+                    model_text.append("High-quality, v-prediction model", style="white")
+                else:
+                    model_text.append(model_info.get("description", "Custom model"), style="white")
+                
+                model_text.append("\n", style="white")
         
         panel = self.create_panel(
             model_text,
@@ -197,19 +272,30 @@ class ModelSelectionMenu(Menu):
         import sys
         from ykgen.console import print_info
         
+        max_choice = len(self.model_mapping)
+        choice_list = "/".join(self.model_mapping.keys())
+        
         while True:
             try:
-                choice = input("  Select model (1 or 2): ").strip()
+                choice = input(f"  Select model ({choice_list}): ").strip()
                 
-                if choice == "1" or choice == "":
-                    print_info("Selected: Flux-Schnell for fast, versatile image generation")
-                    return "flux-schnell"
-                elif choice == "2":
-                    print_info("Selected: Illustrious-vPred for anime/manga style generation")
-                    return "illustrious-vpred"
-
+                # Handle default choice (empty input)
+                if choice == "":
+                    # Find the default model
+                    for choice_num, model_info in self.model_mapping.items():
+                        if model_info["is_default"]:
+                            choice = choice_num
+                            break
+                    else:
+                        # If no default found, use first model
+                        choice = "1"
+                
+                if choice in self.model_mapping:
+                    model_info = self.model_mapping[choice]
+                    print_info(f"Selected: {model_info['name']}")
+                    return model_info["lora_config_key"]
                 else:
-                    print("  Invalid choice. Please enter 1 or 2.")
+                    print(f"  Invalid choice. Please enter {choice_list}.")
                     continue
                     
             except KeyboardInterrupt:

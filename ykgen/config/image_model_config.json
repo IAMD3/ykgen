@@ -42,6 +42,20 @@
         "rescale_cfg_multiplier": 0.6,
         "lora_config_key": "illustrious-vpred",
         "default": true
+      },
+      {
+        "name": "WaiNSFW Illustrious",
+        "checkpoint": "waiNSFWIllustrious_v120.safetensors",
+        "steps": 26,
+        "cfg": 7.0,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
+        "denoise": 1,
+        "sampling": "v_prediction",
+        "zsnr": true,
+        "rescale_cfg_multiplier": 0.6,
+        "lora_config_key": "wai-illustrious",
+        "default": false
       }
     ]
   }

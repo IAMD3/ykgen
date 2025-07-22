@@ -4,39 +4,907 @@
     "simple": "flux-schnell",
     "vpred": "illustrious-vpred"
   },
-  "flux-schnell": {
-    "description": "Ultra-fast 4-step generation with LoRA support",
+   "flux-schnell": {
+    "description": "Ultra-fast 4-step generation with multiple LoRA options",
     "loras": {
       "1": {
-        "name": "Example LoRA - Pixel Art Style",
-        "description": "Example pixel art style LoRA - replace with your preferred LoRA from Civitai",
-        "file": "your-downloaded-lora.safetensors",
+        "name": "No LoRA",
+        "description": "Standard Flux generation without LoRA enhancement",
+        "file": null,
         "trigger_words": {
-          "required": ["pixel art"],
-          "optional": ["retro", "8bit", "pixelated"]
+          "required": [],
+          "optional": []
+        },
+        "display_trigger": "",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "2": {
+        "name": "HEZI Pixel Game Style",
+        "description": "Vertical pixel game art style",
+        "file": "HEZI_F.1竖版像素游戏风格_v5.0.safetensors",
+        "trigger_words": {
+          "required": [
+            "HEZI"
+          ],
+          "optional": [
+            "pixel game",
+            "vertical style",
+            "game art"
+          ]
+        },
+        "display_trigger": "HEZI",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "3": {
+        "name": "Pixel Art Flux",
+        "description": "Modern pixel art style",
+        "file": "pixel-art-flux-v3-learning-rate-4.safetensors",
+        "trigger_words": {
+          "required": [
+            "pixel art"
+          ],
+          "optional": [
+            "retro",
+            "8bit",
+            "pixelated"
+          ]
         },
         "display_trigger": "pixel art",
         "strength_model": 1.0,
-        "strength_clip": 1.0,
-        "download_source": "https://civitai.com/"
+        "strength_clip": 1.0
+      },
+      "4": {
+        "name": "Pixel Art Schnell",
+        "description": "Fast pixel art generation",
+        "file": "pixelart_schnell_v1.safetensors",
+        "trigger_words": {
+          "required": [
+            "pixel art"
+          ],
+          "optional": [
+            "16bit",
+            "retro gaming",
+            "sprite art"
+          ]
+        },
+        "display_trigger": "pixel art",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "5": {
+        "name": "Illustrious XL Schnell",
+        "description": "Anime illustration style",
+        "file": "flux_illustriousXL_schnell_v1-rev2.safetensors",
+        "trigger_words": {
+          "required": [
+            "illustrious style"
+          ],
+          "optional": [
+            "anime",
+            "manga",
+            "illustration"
+          ]
+        },
+        "display_trigger": "illustrious style",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "6": {
+        "name": "PVC Figure",
+        "description": "Collectible figure style",
+        "file": "pvc-shnell-7250+7500.safetensors",
+        "trigger_words": {
+          "required": [
+            "pvc figure",
+            "figma"
+          ],
+          "optional": [
+            "collectible",
+            "figure",
+            "toy"
+          ]
+        },
+        "display_trigger": "pvc figure, figma",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "7": {
+        "name": "Watercolor Schnell",
+        "description": "Watercolor painting style",
+        "file": "watercolor_schnell_v1.safetensors",
+        "trigger_words": {
+          "required": [
+            "watercolor painting"
+          ],
+          "optional": [
+            "artistic",
+            "paint",
+            "brush strokes",
+            "soft colors"
+          ]
+        },
+        "display_trigger": "watercolor painting",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "8": {
+        "name": "Hina Asian Mix",
+        "description": "Asian portrait style",
+        "file": "hinaFluxAsianMixLora-schnell_v4-rev2.safetensors",
+        "trigger_words": {
+          "required": [
+            "Asian girl"
+          ],
+          "optional": [
+            "portrait",
+            "beautiful",
+            "detailed face"
+          ]
+        },
+        "display_trigger": "Asian girl",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
       }
     }
   },
   "illustrious-vpred": {
-    "description": "High-quality anime/manga style with LoRA support",
+    "description": "High-quality anime/manga style with character-specific LoRA",
     "loras": {
       "1": {
-        "name": "Example LoRA - Character Style",
-        "description": "Example character LoRA - replace with your preferred LoRA from Civitai",
-        "file": "your-downloaded-lora.safetensors",
+        "name": "Elena Kimberlite (Character)",
+        "description": "Character LoRA with specific traits for consistent character generation",
+        "file": "Elena_Kimberlite_(Character)_ILXL.safetensors",
         "trigger_words": {
-          "required": ["character_name"],
-          "optional": ["anime", "manga", "illustration"]
+          "required": [
+            "kinsou no vermeil,eyelashes",
+            "nose",
+            "long hair",
+            "bangs",
+            "blue eyes",
+            "white hair"
+          ],
+          "optional": [
+            "eyelashes",
+            "nose",
+            "long hair",
+            "bangs",
+            "blue eyes",
+            "white hair"
+          ]
         },
-        "display_trigger": "character_name",
+        "essential_traits": [
+          "eyelashes",
+          "nose",
+          "long hair",
+          "bangs",
+          "blue eyes",
+          "white hair"
+        ],
+        "display_trigger": "kinsou no vermeil",
+        "notes": "Essential traits are automatically included for character consistency",
         "strength_model": 1.0,
-        "strength_clip": 1.0,
-        "download_source": "https://civitai.com/"
+        "strength_clip": 1.0
+      },
+      "2": {
+        "name": "69yottea Style",
+        "description": "69yottea illustration style",
+        "file": "69yottea_illu_v2.safetensors",
+        "trigger_words": {
+          "required": [
+            "69yottea_style_illu"
+          ],
+          "optional": []
+        },
+        "display_trigger": "69yottea_style_illu",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "3": {
+        "name": "Demon LoRA",
+        "description": "Demon character style with pale skin and horns",
+        "file": "checkpoint-e18_s468.safetensors",
+        "trigger_words": {
+          "required": [
+            "pale skin",
+            "demon horns",
+            "demon",
+            "demon_lora"
+          ],
+          "optional": []
+        },
+        "display_trigger": "pale skin, demon horns, demon, demon_lora",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "4": {
+        "name": "Hype4realistic",
+        "description": "Hyperrealistic style LoRA",
+        "file": "Hyperrealistic_illustrious.safetensors",
+        "trigger_words": {
+          "required": [
+            "Hype4realistic"
+          ],
+          "optional": []
+        },
+        "display_trigger": "Hype4realistic",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "5": {
+        "name": "Hassaku XL v2.2",
+        "description": "Hassaku illustration style without trigger words",
+        "file": "hassakuxlv2.2illu_puriririririri.safetensors",
+        "trigger_words": {
+          "required": [],
+          "optional": []
+        },
+        "display_trigger": "",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "6": {
+        "name": "Mangamaster Style",
+        "description": "Mangamaster style LoRA",
+        "file": "Mangamaster style V4_epoch_8.safetensors",
+        "trigger_words": {
+          "required": [
+            "Mangamast3r"
+          ],
+          "optional": []
+        },
+        "display_trigger": "Mangamast3r",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "7": {
+        "name": "Stylized Art Illustrious",
+        "description": "Chinese manga art style",
+        "file": "StylizedArt1llust.safetensors",
+        "trigger_words": {
+          "required": [
+            "stylizedart",
+            "animeart"
+          ],
+          "optional": []
+        },
+        "display_trigger": "stylizedart, animeart",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "8": {
+        "name": "Mizuryuu Kei Style",
+        "description": "Game CG style with specific character traits",
+        "file": "ill_mizuryuu_kei_styleV1.safetensors",
+        "trigger_words": {
+          "required": [
+            "game cg"
+          ],
+          "optional": [
+            "monochrome",
+            "souma kurumi, black hair, short twintails, pink eyes",
+            "souma mitsuko, black hair, medium hair, glasses, pink eyes",
+            "souma sayoko, medium hair, hair over one eye, blonde hair, blue eyes",
+            "souma souko, medium hair, brown hair, brown eyes",
+            "esu naoko, black hair, short hair, swept bangs"
+          ]
+        },
+        "display_trigger": "game cg",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "9": {
+        "name": "Anicomeij Style",
+        "description": "like korea manga style",
+        "file": "anicomeij-IL.safetensors",
+        "trigger_words": {
+          "required": [
+            "anicomeij art style overlay",
+            "anicomeij character design overlay"
+          ],
+          "optional": []
+        },
+        "display_trigger": "anicomeij art style overlay, anicomeij character design overlay",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "10": {
+        "name": "Manga Style V2",
+        "description": "Manga illustration style without trigger words",
+        "file": "Manga_style_V2-000009.safetensors",
+        "trigger_words": {
+          "required": [
+            "simple background",
+            "monochrome",
+            "greyscale",
+            "traditional media"
+          ],
+          "optional": []
+        },
+        "display_trigger": "",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "11": {
+        "name": "Pixel Illustrious",
+        "description": "Pixel art style LoRA",
+        "file": "pixel-Illustrius.safetensors",
+        "trigger_words": {
+          "required": [
+            "pixel"
+          ],
+          "optional": []
+        },
+        "display_trigger": "pixel",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "12": {
+        "name": "Illustrious Tweaker LoRA v2",
+        "description": "Multi-artist style LoRA with child/loli character focus and school uniform elements",
+        "file": "IllustriousTweakerLora_v2-rev9.safetensors",
+        "trigger_words": {
+          "required": [
+            "1girl",
+            "(solo)",
+            "child",
+            "loli",
+            "(artist:ningen_mame:0.9)",
+            "(artist:sho_(sho_lwlw):0.9)",
+            "(artist:rhasta:0.9)",
+            "(artist:wlopo:0.7)",
+            "(artist:ke-ta:0.6)",
+            "(fkey:0.5)",
+            "(fuzichoco:0.6)",
+            "artist:chen bin",
+            "(hyouuma:0.85)",
+            "hairband",
+            "sailor collar",
+            "black pantyhose",
+            "school uniform",
+            "shoes",
+            "pleated skirt",
+            "very awa",
+            "masterpiece",
+            "best quality",
+            "year 2024",
+            "newest",
+            "highres",
+            "absurds",
+            "best quality",
+            "amazing quality",
+            "very aesthetic",
+            "absurdsre"
+          ],
+          "optional": []
+        },
+        "display_trigger": "1girl, (solo), child, loli, (artist:ningen_mame:0.9), (artist:sho_(sho_lwlw):0.9), (artist:rhasta:0.9), (artist:wlopo:0.7), (artist:ke-ta:0.6), (fkey:0.5), (fuzichoco:0.6), artist:chen bin, (hyouuma:0.85), hairband, sailor collar, black pantyhose, school uniform, shoes, pleated skirt, very awa, masterpiece, best quality, year 2024, newest, highres, absurds, best quality, amazing quality, very aesthetic, absurdsre",
+        "strength_model": 0.85,
+        "strength_clip": 0.85,
+        "recommended_settings": {
+          "cfg": 4.5,
+          "sampler": "euler_ancestral",
+          "steps": 28
+        }
+      },
+      "13": {
+        "name": "Mignon V1",
+        "description": "Multi-artist style LoRA with child/loli character focus and soccer uniform elements",
+        "file": "mignon-V1.safetensors",
+        "trigger_words": {
+          "required": [
+            "1girl",
+            "child",
+            "loli",
+            "(artist:ningen_mame:0.9)",
+            "(artist:sho_(sho_lwlw):0.9)",
+            "(artist:rhasta:0.9)",
+            "(artist:wlopo:0.7)",
+            "(artist:ke-ta:0.6)",
+            "(fkey:0.5)",
+            "(fuzichoco:0.6)",
+            "artist:chen bin",
+            "(hyouuma:0.85)",
+            "ligue 1",
+            "name connection",
+            "soccer",
+            "soccer uniform",
+            "sportswear",
+            "very awa",
+            "masterpiece",
+            "best quality",
+            "year 2024",
+            "newest",
+            "highres",
+            "absurdsres",
+            "best quality",
+            "amazing quality",
+            "very aesthetic",
+            "absurdsres"
+          ],
+          "optional": []
+        },
+        "display_trigger": "1girl, child, loli, (artist:ningen_mame:0.9), (artist:sho_(sho_lwlw):0.9), (artist:rhasta:0.9), (artist:wlopo:0.7), (artist:ke-ta:0.6), (fkey:0.5), (fuzichoco:0.6), artist:chen bin, (hyouuma:0.85), ligue 1, name connection, soccer, soccer uniform, sportswear, very awa, masterpiece, best quality, year 2024, newest, highres, absurdsres, best quality, amazing quality, very aesthetic, absurdsres",
+        "strength_model": 0.85,
+        "strength_clip": 0.85,
+        "recommended_settings": {
+          "cfg": 4.5,
+          "sampler": "euler_ancestral",
+          "steps": 28
+        }
+      },
+      "14": {
+        "name": "iLLThouS40k",
+        "description": "Warhammer 40K style for space marines LoRA",
+        "file": "iLLThouS40k.safetensors",
+        "trigger_words": {
+          "required": [
+            "DeathW40K"
+          ],
+          "optional": []
+        },
+        "display_trigger": "DeathW40K",
+        "strength_model": 0.9,
+        "strength_clip": 0.9
+      },
+      "15": {
+        "name": "Cadian Imperial Guard",
+        "description": "Warhammer 40K Cadian Astra Militarum style LoRA",
+        "file": "cadian-il.safetensors",
+        "trigger_words": {
+          "required": [
+            "cadian",
+            "astra militarum"
+          ],
+          "optional": [
+            "armor",
+            "helmet"
+          ]
+        },
+        "display_trigger": "cadian, astra militarum",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "16": {
+        "name": "Adepta Sororitas",
+        "description": "Warhammer 40K Sisters of Battle style LoRA",
+        "file": "sororita-il.safetensors",
+        "trigger_words": {
+          "required": [
+            "sororita-il",
+            "power armor",
+            "adepta sororitas"
+          ],
+          "optional": []
+        },
+        "display_trigger": "sororita-il, power armor, adepta sororitas",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "17": {
+        "name": "Manga Mode",
+        "description": "Black and white manga style with screentones and crosshatching",
+        "file": "Manga_Mode_Illustrious.safetensors",
+        "trigger_words": {
+          "required": [
+            "m4ng4",
+            "monochrome"
+          ],
+          "optional": [
+            "greyscale",
+            "screentones",
+            "crosshatching"
+          ]
+        },
+        "display_trigger": "m4ng4, monochrome",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "18": {
+        "name": "space marine creator",
+        "description": "warhammer 40k space marines style",
+        "file": "SpaceMarines_Creator_warhammer_Leaf1.safetensors",
+        "trigger_words": {
+          "required": [
+            "spacemarines"
+          ],
+          "optional": [
+            "armor, pauldrons, gauntlets"
+          ]
+        },
+        "display_trigger": "spacemarines, armor, pauldrons, gauntlets",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      }
+    }
+  },
+  "wai-illustrious": {
+    "description": "NSFW-capable illustrative style with 26-step generation and character-specific LoRAs",
+    "loras": {
+      "1": {
+        "name": "Elena Kimberlite (Character)",
+        "description": "Character LoRA with specific traits for consistent character generation",
+        "file": "Elena_Kimberlite_(Character)_ILXL.safetensors",
+        "trigger_words": {
+          "required": [
+            "kinsou no vermeil,eyelashes",
+            "nose",
+            "long hair",
+            "bangs",
+            "blue eyes",
+            "white hair"
+          ],
+          "optional": [
+            "eyelashes",
+            "nose",
+            "long hair",
+            "bangs",
+            "blue eyes",
+            "white hair"
+          ]
+        },
+        "essential_traits": [
+          "eyelashes",
+          "nose",
+          "long hair",
+          "bangs",
+          "blue eyes",
+          "white hair"
+        ],
+        "display_trigger": "kinsou no vermeil",
+        "notes": "Essential traits are automatically included for character consistency",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "2": {
+        "name": "69yottea Style",
+        "description": "69yottea illustration style",
+        "file": "69yottea_illu_v2.safetensors",
+        "trigger_words": {
+          "required": [
+            "69yottea_style_illu"
+          ],
+          "optional": []
+        },
+        "display_trigger": "69yottea_style_illu",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "3": {
+        "name": "Demon LoRA",
+        "description": "Demon character style with pale skin and horns",
+        "file": "checkpoint-e18_s468.safetensors",
+        "trigger_words": {
+          "required": [
+            "pale skin",
+            "demon horns",
+            "demon",
+            "demon_lora"
+          ],
+          "optional": []
+        },
+        "display_trigger": "pale skin, demon horns, demon, demon_lora",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "4": {
+        "name": "Hype4realistic",
+        "description": "Hyperrealistic style LoRA",
+        "file": "Hyperrealistic_illustrious.safetensors",
+        "trigger_words": {
+          "required": [
+            "Hype4realistic"
+          ],
+          "optional": []
+        },
+        "display_trigger": "Hype4realistic",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "5": {
+        "name": "Hassaku XL v2.2",
+        "description": "Hassaku illustration style without trigger words",
+        "file": "hassakuxlv2.2illu_puriririririri.safetensors",
+        "trigger_words": {
+          "required": [],
+          "optional": []
+        },
+        "display_trigger": "",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "6": {
+        "name": "Mangamaster Style",
+        "description": "Mangamaster style LoRA",
+        "file": "Mangamaster style V4_epoch_8.safetensors",
+        "trigger_words": {
+          "required": [
+            "Mangamast3r"
+          ],
+          "optional": []
+        },
+        "display_trigger": "Mangamast3r",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "7": {
+        "name": "Stylized Art Illustrious",
+        "description": "Chinese manga art style",
+        "file": "StylizedArt1llust.safetensors",
+        "trigger_words": {
+          "required": [
+            "stylizedart",
+            "animeart"
+          ],
+          "optional": []
+        },
+        "display_trigger": "stylizedart, animeart",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "8": {
+        "name": "Mizuryuu Kei Style",
+        "description": "Game CG style with specific character traits",
+        "file": "ill_mizuryuu_kei_styleV1.safetensors",
+        "trigger_words": {
+          "required": [
+            "game cg"
+          ],
+          "optional": [
+            "monochrome",
+            "souma kurumi, black hair, short twintails, pink eyes",
+            "souma mitsuko, black hair, medium hair, glasses, pink eyes",
+            "souma sayoko, medium hair, hair over one eye, blonde hair, blue eyes",
+            "souma souko, medium hair, brown hair, brown eyes",
+            "esu naoko, black hair, short hair, swept bangs"
+          ]
+        },
+        "display_trigger": "game cg",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "9": {
+        "name": "Anicomeij Style",
+        "description": "like korea manga style",
+        "file": "anicomeij-IL.safetensors",
+        "trigger_words": {
+          "required": [
+            "anicomeij art style overlay",
+            "anicomeij character design overlay"
+          ],
+          "optional": []
+        },
+        "display_trigger": "anicomeij art style overlay, anicomeij character design overlay",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "10": {
+        "name": "Manga Style V2",
+        "description": "Manga illustration style without trigger words",
+        "file": "Manga_style_V2-000009.safetensors",
+        "trigger_words": {
+          "required": [
+            "simple background",
+            "monochrome",
+            "greyscale",
+            "traditional media"
+          ],
+          "optional": []
+        },
+        "display_trigger": "",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "11": {
+        "name": "Pixel Illustrious",
+        "description": "Pixel art style LoRA",
+        "file": "pixel-Illustrius.safetensors",
+        "trigger_words": {
+          "required": [
+            "pixel"
+          ],
+          "optional": []
+        },
+        "display_trigger": "pixel",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "12": {
+        "name": "Illustrious Tweaker LoRA v2",
+        "description": "Multi-artist style LoRA with child/loli character focus and school uniform elements",
+        "file": "IllustriousTweakerLora_v2-rev9.safetensors",
+        "trigger_words": {
+          "required": [
+            "1girl",
+            "(solo)",
+            "child",
+            "loli",
+            "(artist:ningen_mame:0.9)",
+            "(artist:sho_(sho_lwlw):0.9)",
+            "(artist:rhasta:0.9)",
+            "(artist:wlopo:0.7)",
+            "(artist:ke-ta:0.6)",
+            "(fkey:0.5)",
+            "(fuzichoco:0.6)",
+            "artist:chen bin",
+            "(hyouuma:0.85)",
+            "hairband",
+            "sailor collar",
+            "black pantyhose",
+            "school uniform",
+            "shoes",
+            "pleated skirt",
+            "very awa",
+            "masterpiece",
+            "best quality",
+            "year 2024",
+            "newest",
+            "highres",
+            "absurds",
+            "best quality",
+            "amazing quality",
+            "very aesthetic",
+            "absurdsre"
+          ],
+          "optional": []
+        },
+        "display_trigger": "1girl, (solo), child, loli, (artist:ningen_mame:0.9), (artist:sho_(sho_lwlw):0.9), (artist:rhasta:0.9), (artist:wlopo:0.7), (artist:ke-ta:0.6), (fkey:0.5), (fuzichoco:0.6), artist:chen bin, (hyouuma:0.85), hairband, sailor collar, black pantyhose, school uniform, shoes, pleated skirt, very awa, masterpiece, best quality, year 2024, newest, highres, absurds, best quality, amazing quality, very aesthetic, absurdsre",
+        "strength_model": 0.85,
+        "strength_clip": 0.85,
+        "recommended_settings": {
+          "cfg": 4.5,
+          "sampler": "euler_ancestral",
+          "steps": 28
+        }
+      },
+      "13": {
+        "name": "Mignon V1",
+        "description": "Multi-artist style LoRA with child/loli character focus and soccer uniform elements",
+        "file": "mignon-V1.safetensors",
+        "trigger_words": {
+          "required": [
+            "1girl",
+            "child",
+            "loli",
+            "(artist:ningen_mame:0.9)",
+            "(artist:sho_(sho_lwlw):0.9)",
+            "(artist:rhasta:0.9)",
+            "(artist:wlopo:0.7)",
+            "(artist:ke-ta:0.6)",
+            "(fkey:0.5)",
+            "(fuzichoco:0.6)",
+            "artist:chen bin",
+            "(hyouuma:0.85)",
+            "ligue 1",
+            "name connection",
+            "soccer",
+            "soccer uniform",
+            "sportswear",
+            "very awa",
+            "masterpiece",
+            "best quality",
+            "year 2024",
+            "newest",
+            "highres",
+            "absurdsres",
+            "best quality",
+            "amazing quality",
+            "very aesthetic",
+            "absurdsres"
+          ],
+          "optional": []
+        },
+        "display_trigger": "1girl, child, loli, (artist:ningen_mame:0.9), (artist:sho_(sho_lwlw):0.9), (artist:rhasta:0.9), (artist:wlopo:0.7), (artist:ke-ta:0.6), (fkey:0.5), (fuzichoco:0.6), artist:chen bin, (hyouuma:0.85), ligue 1, name connection, soccer, soccer uniform, sportswear, very awa, masterpiece, best quality, year 2024, newest, highres, absurdsres, best quality, amazing quality, very aesthetic, absurdsres",
+        "strength_model": 0.85,
+        "strength_clip": 0.85,
+        "recommended_settings": {
+          "cfg": 4.5,
+          "sampler": "euler_ancestral",
+          "steps": 28
+        }
+      },
+      "14": {
+        "name": "iLLThouS40k",
+        "description": "Warhammer 40K style for space marines LoRA",
+        "file": "iLLThouS40k.safetensors",
+        "trigger_words": {
+          "required": [
+            "DeathW40K"
+          ],
+          "optional": []
+        },
+        "display_trigger": "DeathW40K",
+        "strength_model": 0.9,
+        "strength_clip": 0.9
+      },
+      "15": {
+        "name": "Cadian Imperial Guard",
+        "description": "Warhammer 40K Cadian Astra Militarum style LoRA",
+        "file": "cadian-il.safetensors",
+        "trigger_words": {
+          "required": [
+            "cadian",
+            "astra militarum"
+          ],
+          "optional": [
+            "armor",
+            "helmet"
+          ]
+        },
+        "display_trigger": "cadian, astra militarum",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "16": {
+        "name": "Adepta Sororitas",
+        "description": "Warhammer 40K Sisters of Battle style LoRA",
+        "file": "sororita-il.safetensors",
+        "trigger_words": {
+          "required": [
+            "sororita-il",
+            "power armor",
+            "adepta sororitas"
+          ],
+          "optional": []
+        },
+        "display_trigger": "sororita-il, power armor, adepta sororitas",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "17": {
+        "name": "Manga Mode",
+        "description": "Black and white manga style with screentones and crosshatching",
+        "file": "Manga_Mode_Illustrious.safetensors",
+        "trigger_words": {
+          "required": [
+            "m4ng4",
+            "monochrome"
+          ],
+          "optional": [
+            "greyscale",
+            "screentones",
+            "crosshatching"
+          ]
+        },
+        "display_trigger": "m4ng4, monochrome",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "18": {
+        "name": "space marine creator",
+        "description": "warhammer 40k space marines style",
+        "file": "SpaceMarines_Creator_warhammer_Leaf1.safetensors",
+        "trigger_words": {
+          "required": [
+            "spacemarines"
+          ],
+          "optional": [
+            "armor, pauldrons, gauntlets"
+          ]
+        },
+        "display_trigger": "spacemarines, armor, pauldrons, gauntlets",
+        "strength_model": 1.0,
+        "strength_clip": 1.0
+      },
+      "19": {
+        "name": "robot faceless girl",
+        "description": "like korea manga style",
+        "file": "Faceless_mask_ILL.safetensors",
+        "trigger_words": {
+          "required": [
+            "FaceLess Mask"
+          ],
+          "optional": [
+            "Patterned/Armor/Robot mask",
+            "Helmet",
+            "Halo",
+            "Kokoshnik"
+          ]
+        },
+        "display_trigger": "a robot body",
+        "strength_model": 0.9,
+        "strength_clip": 0.9
       }
     }
   }
