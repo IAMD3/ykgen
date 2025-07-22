@@ -58,7 +58,7 @@ from .video import (
     VideoResultProcessor,
     VideoQualityManager,
 )
-from .image import ComfyUIClient4Flux, generate_images_for_scenes
+from .image import ComfyUIClient4Flux, ComfyUISimpleClient, ComfyUIVPredClient, generate_images_for_scenes
 from .providers import get_llm
 from ykgen.lora.lora_selector import LoRASelector, select_loras_for_scenes, select_loras_for_all_scenes_optimized
 from .console import (
@@ -118,6 +118,8 @@ __all__ = [
     "VideoQualityManager",
     # ComfyUI integration
     "ComfyUIClient4Flux",
+    "ComfyUISimpleClient",
+    "ComfyUIVPredClient",
     "generate_images_for_scenes",
     # Audio generation
     "ComfyUIAudioClient",

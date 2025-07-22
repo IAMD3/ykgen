@@ -1,4 +1,9 @@
 {
+  "_model_mapping": {
+    "comment": "This section maps image model config keys to LoRA config keys",
+    "simple": "flux-schnell",
+    "vpred": "illustrious-vpred"
+  },
   "flux-schnell": {
     "description": "Ultra-fast 4-step generation with LoRA support",
     "loras": {
