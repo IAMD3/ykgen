@@ -13,9 +13,9 @@ from pathlib import Path
 
 def get_lora_config_path() -> str:
     """Get the path to the LoRA configuration file."""
-    # Look for the config file in the same directory as this module
-    current_dir = Path(__file__).parent.parent
-    config_path = current_dir /"config/lora_config.json"
+    # Look for the config file in the project root
+    current_dir = Path(__file__).parent.parent.parent
+    config_path = current_dir / "lora_config.json"
     return str(config_path)
 
 
@@ -25,22 +25,27 @@ def get_lora_key_for_model_type(model_type: str) -> str:
     Args:
         model_type: Model type from CLI (e.g., 'flux-schnell', 'illustrious-vpred')
                    or from image config (e.g., 'simple', 'vpred')
+                   or actual model name (e.g., 'WaiNSFW Illustrious')
     
     Returns:
         str: The corresponding LoRA configuration key
     """
-    # Load the mapping from lora_config.json
     try:
+        # First, check if it's already a valid LoRA key
         config = load_lora_config()
-        mapping = config.get("_model_mapping", {})
-        
-        # If it's already a valid LoRA key, return as-is
         if model_type in config and model_type != "_model_mapping":
             return model_type
         
-        # Try to map from image config key to LoRA key
+        # Try to map from image config category to LoRA key
+        mapping = config.get("_model_mapping", {})
         if model_type in mapping:
             return mapping[model_type]
+        
+        # If it might be a model name, look it up in image_model_config.json
+        from ykgen.config.image_model_loader import find_model_by_name
+        model_config = find_model_by_name(model_type)
+        if model_config and "lora_config_key" in model_config:
+            return model_config["lora_config_key"]
         
         # Fallback to flux-schnell for unknown types
         return "flux-schnell"

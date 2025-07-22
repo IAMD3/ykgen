@@ -32,7 +32,7 @@
         "sampler_name": "euler_ancestral",
         "scheduler": "normal",
         "denoise": 1,
-        "lora_config_key": "gufeng(undefined)",
+        "lora_config_key": "empty",
         "default": false
       }, {
         "name": "illustrious-xl standard",

@@ -175,7 +175,7 @@ class ModelSelectionMenu(Menu):
     
     def _load_available_models(self) -> Dict[str, List[Dict[str, Any]]]:
         """Load available models from image_model_config.json."""
-        config_path = Path(__file__).parent.parent / "config" / "image_model_config.json"
+        config_path = Path(__file__).parent.parent.parent / "image_model_config.json"
         
         try:
             with open(config_path, 'r') as f:
@@ -293,7 +293,7 @@ class ModelSelectionMenu(Menu):
                 if choice in self.model_mapping:
                     model_info = self.model_mapping[choice]
                     print_info(f"Selected: {model_info['name']}")
-                    return model_info["lora_config_key"]
+                    return model_info["name"]
                 else:
                     print(f"  Invalid choice. Please enter {choice_list}.")
                     continue

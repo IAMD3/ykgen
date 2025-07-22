@@ -907,5 +907,10 @@
         "strength_clip": 0.9
       }
     }
+  }, 
+   "empty": {
+    "description": "empty",
+    "loras": {
+    }
   }
 }

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .comfyui_image_base import ComfyUIImageClientBase
+from ..config.image_model_loader import  get_image_model_config_path
 from ..console import print_success
 from .. import Scene
 
@@ -26,7 +27,7 @@ class ComfyUIVPredClient(ComfyUIImageClientBase):
     
     def _load_model_config(self, model_name: Optional[str] = None) -> Dict[str, Any]:
         """Load model configuration from image_model_config.json."""
-        config_path = Path(__file__).parent.parent / "config" / "image_model_config.json"
+        config_path = get_image_model_config_path()
         
         try:
             with open(config_path, 'r') as f:

@@ -144,7 +144,7 @@ class CLI:
             
             # Validate LoRA configuration
             if not validate_lora_config():
-                raise ValidationError("Invalid LoRA configuration file", "Please check the location of lora_config.json")
+                raise ValidationError("Invalid LoRA configuration file", "Please check lora_config.json in project root")
             
             # Display key status
             status_lines = config.show_key_status().split('\n')
