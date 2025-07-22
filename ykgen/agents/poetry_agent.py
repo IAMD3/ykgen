@@ -20,6 +20,7 @@ from langgraph.graph import StateGraph
 from .base_agent import BaseAgent
 from ..video import wait_for_all_videos
 from ykgen.config.config import config
+from ..config.model_types import get_model_display_name
 from ..console import (
     print_info,
     print_success,
@@ -415,7 +416,7 @@ between scenes in terms of characters and the poetic environment described."""
     def generate_images(self, state: VisionState) -> VisionState:
         """Generate images for the scenes using ComfyUI and selected model with adaptive LoRA mode."""
         model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = "Illustrious vPred" if model_type == "illustrious-vpred" else "Flux-Schnell"
+        model_name = get_model_display_name(model_type)
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')
@@ -443,7 +444,7 @@ between scenes in terms of characters and the poetic environment described."""
             image_paths = generate_images_for_scenes_adaptive_optimized(
                 scenes=state["scenes"],
                 lora_config=self.lora_config,
-    
+                model_name=model_name
             )
                 
             print_success(f"Successfully generated {len(image_paths)} images with {model_name}")
@@ -531,7 +532,7 @@ between scenes in terms of characters and the poetic environment described."""
     def generate_multiple_images(self, state: VisionState) -> VisionState:
         """Generate multiple images per scene for pure image mode using ComfyUI and selected model with adaptive LoRA mode."""
         model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = "Illustrious vPred" if model_type == "illustrious-vpred" else "Flux-Schnell"
+        model_name = get_model_display_name(model_type)
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')
@@ -585,7 +586,7 @@ between scenes in terms of characters and the poetic environment described."""
                         scenes=single_scene,
                         lora_config=self.lora_config,
                         output_dir=output_dir,
-        
+                        model_name=model_name
                     )
                     
                     # Add the generated image path

@@ -11,6 +11,7 @@ from typing import List, Dict, Any, Optional
 from ykgen.lora.lora_selector import select_loras_for_scenes, select_loras_for_all_scenes_optimized
 from ..providers import get_llm
 from ..console import status_update, print_success, print_warning
+from ..config.model_types import is_vpred_model, get_model_display_name
 from .comfyui_image_simple import ComfyUISimpleClient
 from .comfyui_image_vpred import ComfyUIVPredClient
 
@@ -19,7 +20,8 @@ def generate_images_for_scenes_group_mode_optimized(
     scenes: List[Dict[str, Any]], 
     group_config: Dict[str, Any],
     output_dir: Optional[str] = None,
-    llm_provider = None
+    llm_provider = None,
+    model_name: Optional[str] = None
 ) -> List[str]:
     """
     Generate images for scenes using optimized group mode with story-wide LoRA selection.
@@ -73,14 +75,13 @@ def generate_images_for_scenes_group_mode_optimized(
         
         # Generate image for this scene with the story-wide selected LoRAs
         try:
-            if model_type == "illustrious-vpred":
-                # Use Illustrious model
-                client = ComfyUIVPredClient(lora_config=story_lora_config)
+            if is_vpred_model(model_type):
+                # Use vPred workflow
+                client = ComfyUIVPredClient(lora_config=story_lora_config, model_name=model_name)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
-            # illustrious-alt model option removed
             else:
-                # Use Flux model
-                client = ComfyUISimpleClient(lora_config=story_lora_config)
+                # Use simple workflow
+                client = ComfyUISimpleClient(lora_config=story_lora_config, model_name=model_name)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
             
             image_paths.extend(scene_image_paths)
@@ -98,7 +99,8 @@ def generate_images_for_scenes_group_mode(
     scenes: List[Dict[str, Any]], 
     group_config: Dict[str, Any],
     output_dir: Optional[str] = None,
-    llm_provider = None
+    llm_provider = None,
+    model_name: Optional[str] = None
 ) -> List[str]:
     """
     Generate images for scenes using group mode with dynamic LoRA selection.
@@ -148,14 +150,13 @@ def generate_images_for_scenes_group_mode(
         
         # Generate image for this scene with the selected LoRAs
         try:
-            if model_type == "illustrious-vpred":
-                # Use Illustrious model
-                client = ComfyUIVPredClient(lora_config=lora_config)
+            if is_vpred_model(model_type):
+                # Use vPred workflow
+                client = ComfyUIVPredClient(lora_config=lora_config, model_name=model_name)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
-            # illustrious-alt model option removed
             else:
-                # Use Flux model
-                client = ComfyUISimpleClient(lora_config=lora_config)
+                # Use simple workflow
+                client = ComfyUISimpleClient(lora_config=lora_config, model_name=model_name)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
             
             image_paths.extend(scene_image_paths)
@@ -172,7 +173,8 @@ def generate_images_for_scenes_group_mode(
 def generate_images_for_scenes_all_mode(
     scenes: List[Dict[str, Any]], 
     lora_config: Optional[Dict[str, Any]] = None,
-    output_dir: Optional[str] = None
+    output_dir: Optional[str] = None,
+    model_name: Optional[str] = None
 ) -> List[str]:
     """
     Generate images for scenes using all mode (traditional behavior).
@@ -192,23 +194,14 @@ def generate_images_for_scenes_all_mode(
     
     # Generate images using the traditional method
     try:
-        if model_type == "illustrious-vpred":
-            # Import here to avoid circular imports
-            from .comfyui_image_vpred import generate_illustrious_images_for_scenes
-            image_paths = generate_illustrious_images_for_scenes(
-                scenes=scenes,
-                lora_config=lora_config,
-                output_dir=output_dir
-            )
-        # illustrious-alt model option removed
+        if is_vpred_model(model_type):
+            # Use vPred workflow
+            client = ComfyUIVPredClient(lora_config=lora_config, model_name=model_name)
+            image_paths = client.generate_scene_images(scenes, output_dir)
         else:
-            # Import here to avoid circular imports
-            from .comfyui_image_simple import generate_images_for_scenes
-            image_paths = generate_images_for_scenes(
-                scenes=scenes,
-                lora_config=lora_config,
-                output_dir=output_dir
-            )
+            # Use simple workflow
+            client = ComfyUISimpleClient(lora_config=lora_config, model_name=model_name)
+            image_paths = client.generate_scene_images(scenes, output_dir)
         
         print_success(f"All mode image generation completed: {len(image_paths)} images generated")
         return image_paths
@@ -222,7 +215,8 @@ def generate_images_for_scenes_adaptive(
     scenes: List[Dict[str, Any]], 
     lora_config: Optional[Dict[str, Any]] = None,
     output_dir: Optional[str] = None,
-    llm_provider = None
+    llm_provider = None,
+    model_name: Optional[str] = None
 ) -> List[str]:
     """
     Generate images for scenes with adaptive mode selection.
@@ -241,7 +235,7 @@ def generate_images_for_scenes_adaptive(
     """
     if not lora_config:
         # No LoRA config, use all mode with no LoRAs
-        return generate_images_for_scenes_all_mode(scenes, None, output_dir)
+        return generate_images_for_scenes_all_mode(scenes, None, output_dir, model_name)
     
     # Check if this is group mode
     if lora_config.get("mode") == "group":
@@ -250,21 +244,23 @@ def generate_images_for_scenes_adaptive(
             scenes=scenes,
             group_config=lora_config,
             output_dir=output_dir,
-            llm_provider=llm_provider
+            llm_provider=llm_provider,
+            model_name=model_name
         )
     elif lora_config.get("mode") == "none":
         status_update("Detected none mode configuration - using base model only", "bright_cyan")
-        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
+        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir, model_name)
     else:
         status_update("Detected all mode configuration", "bright_green")
-        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
+        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir, model_name)
 
 
 def generate_images_for_scenes_adaptive_optimized(
     scenes: List[Dict[str, Any]], 
     lora_config: Optional[Dict[str, Any]] = None,
     output_dir: Optional[str] = None,
-    llm_provider = None
+    llm_provider = None,
+    model_name: Optional[str] = None
 ) -> List[str]:
     """
     Generate images for scenes with adaptive mode selection using optimized approach.
@@ -292,11 +288,12 @@ def generate_images_for_scenes_adaptive_optimized(
             scenes=scenes,
             group_config=lora_config,
             output_dir=output_dir,
-            llm_provider=llm_provider
+            llm_provider=llm_provider,
+            model_name=model_name
         )
     elif lora_config.get("mode") == "none":
         status_update("Detected none mode configuration - using base model only", "bright_cyan")
-        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
+        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir, model_name)
     else:
         status_update("Detected all mode configuration", "bright_green")
-        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir)
+        return generate_images_for_scenes_all_mode(scenes, lora_config, output_dir, model_name)
