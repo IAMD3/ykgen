@@ -1,16 +1,20 @@
-# ComfyUI Setup Guide for KGen
+# ComfyUI Setup Guide for YKGen
 
-This guide will help you set up ComfyUI for use with KGen's image generation capabilities. ComfyUI is essential for high-quality image generation in KGen.
+This guide will help you set up ComfyUI for use with YKGen's image generation capabilities. ComfyUI is the only external dependency required for YKGen.
 
 ## Overview
 
-YKGen supports configurable image generation models through ComfyUI. You can configure models in `ykgen/config/image_model_config.json` and LoRAs in `ykgen/config/lora_config.json`.
+**You have complete freedom to choose any image generation models and LoRAs you prefer.** YKGen is designed to work with any ComfyUI-compatible models through configurable JSON files.
 
-### Suggested Models (Optional)
+### Configuration Files
+- **Model Config**: `ykgen/config/image_model_config.json` - Configure your preferred models
+- **LoRA Config**: `ykgen/config/lora_config.json` - Configure your preferred LoRA styles
+
+### Recommended Models (Optional)
 - **Flux-Schnell**: Ultra-fast generation (1-2 seconds per image)
 - **WaiNSFW Illustrious**: High-quality NSFW-capable illustrative style (default)
 - **Illustrious-vPred**: High-quality anime/manga style generation
-- **Custom Models**: Add your own by editing the configuration files
+- **Any Custom Models**: Simply add them to the configuration files
 
 ## Prerequisites
 
@@ -48,19 +52,18 @@ source comfyui_env/bin/activate  # On Windows: comfyui_env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Step 2: Configure and Download Models
+## Step 2: Choose and Configure Your Models
 
-### Model Configuration
+### Model Freedom
 
-YKGen uses configuration files to manage models and LoRAs:
-- **Model Config**: `ykgen/config/image_model_config.json` - Configure available models
-- **LoRA Config**: `ykgen/config/lora_config.json` - Configure available LoRA styles
+**You can use ANY models you prefer!** YKGen works with any ComfyUI-compatible models. Simply:
+1. Download your preferred models to ComfyUI's `models/checkpoints/` directory
+2. Edit `ykgen/config/image_model_config.json` to add your models
+3. Optionally configure LoRAs in `ykgen/config/lora_config.json`
 
-You can add your own models by editing these configuration files and placing the model files in the appropriate ComfyUI directories.
+### Example Model Downloads (Optional Recommendations)
 
-### Suggested Model Downloads (Optional)
-
-The following are suggested models that work well with YKGen's default configuration:
+Here are some popular models that work well with YKGen, but feel free to use any models you prefer:
 
 Create the checkpoints directory if it doesn't exist:
 ```bash
@@ -117,25 +120,22 @@ mkdir -p models/clip/
 # CLIP models are usually included with main models
 ```
 
-## Step 3: Configure and Download LoRA Models (Optional)
+## Step 3: Add LoRA Models (Optional)
 
-LoRA models enhance image generation with specific artistic styles. YKGen comes with pre-configured LoRAs in `ykgen/config/lora_config.json`.
+**Use any LoRAs you like!** LoRA models enhance image generation with specific artistic styles.
 
 ### Setup LoRA Directory
 ```bash
 mkdir -p models/loras/
 ```
 
-### LoRA Configuration
+### Adding Your LoRAs
 
-YKGen includes configurations for:
-- **Flux-Schnell LoRAs**: 8 professional styles (pixel art, anime, watercolor, etc.)
-- **Illustrious LoRAs**: 18+ character and style LoRAs for anime/manga
-- **WaiNSFW LoRAs**: NSFW-capable LoRAs for mature content
+1. Download any LoRA files you want to `models/loras/`
+2. Add them to `ykgen/config/lora_config.json` configuration
+3. YKGen will automatically detect and use them
 
-You can add custom LoRAs by:
-1. Downloading LoRA files to `models/loras/`
-2. Adding configuration entries to `ykgen/config/lora_config.json`
+**Note**: YKGen comes with some pre-configured LoRAs as examples, but you can replace them with any LoRAs you prefer.
 
 ### LoRA Sources
 - [Hugging Face LoRA Collection](https://huggingface.co/models?other=lora)
@@ -268,20 +268,20 @@ ComfyUI/
 └── [other ComfyUI files]
 ```
 
-## Model Configuration Files
+## Using Your Own Models
 
-YKGen uses these configuration files to manage models and LoRAs:
-- `ykgen/config/image_model_config.json` - Configure available image generation models
-- `ykgen/config/lora_config.json` - Configure available LoRA styles and enhancements
+**Complete Freedom**: YKGen is designed to work with ANY ComfyUI-compatible models. The configuration files are just examples:
+- `ykgen/config/image_model_config.json` - Add your preferred image generation models
+- `ykgen/config/lora_config.json` - Add your preferred LoRA styles
 
-Edit these files to add your own models or modify existing configurations.
+**Simply edit these files to use your own models instead of the defaults.**
 
 ## Next Steps
 
 Once ComfyUI is set up and running:
-1. Return to the main KGen documentation
+1. Return to the main YKGen documentation
 2. Configure your `.env` file with API keys
-3. Start generating amazing content with KGen!
+3. Start generating amazing content with YKGen!
 
 ## Support
 

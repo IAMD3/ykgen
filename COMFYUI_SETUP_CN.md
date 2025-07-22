@@ -1,12 +1,20 @@
-# KGen ComfyUI 设置指南
+# YKGen ComfyUI 设置指南
 
-本指南将帮助您为KGen的图像生成功能设置ComfyUI。ComfyUI是KGen高质量图像生成的核心组件。
+本指南将帮助您为YKGen的图像生成功能设置ComfyUI。ComfyUI是YKGen唯一需要的外部依赖。
 
 ## 概述
 
-KGen通过ComfyUI支持两种主要的图像生成模型：
+**您可以完全自由地选择任何您喜欢的图像生成模型和LoRA。** YKGen设计为通过可配置的JSON文件与任何ComfyUI兼容的模型一起工作。
+
+### 配置文件
+- **模型配置**: `ykgen/config/image_model_config.json` - 配置您偏好的模型
+- **LoRA配置**: `ykgen/config/lora_config.json` - 配置您偏好的LoRA风格
+
+### 推荐模型（可选）
 - **Flux-Schnell**：超快速生成（每张图像1-2秒）
+- **WaiNSFW Illustrious**：高质量NSFW功能的插画风格（默认）
 - **Illustrious-vPred**：高质量动漫/漫画风格生成
+- **任何自定义模型**：只需将它们添加到配置文件中
 
 ## 系统要求
 
@@ -44,16 +52,25 @@ source comfyui_env/bin/activate  # Windows系统：comfyui_env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## 步骤2：下载必需模型
+## 步骤2：选择和配置您的模型
 
-### 主要模型（必需）
+### 模型自由度
+
+**您可以使用任何您喜欢的模型！** YKGen与任何ComfyUI兼容的模型一起工作。只需：
+1. 将您偏好的模型下载到ComfyUI的`models/checkpoints/`目录
+2. 编辑`ykgen/config/image_model_config.json`添加您的模型
+3. 可选择在`ykgen/config/lora_config.json`中配置LoRA
+
+### 示例模型下载（可选推荐）
+
+以下是一些与YKGen配合良好的热门模型，但您可以自由使用任何您偏好的模型：
 
 如果不存在，创建checkpoints目录：
 ```bash
 mkdir -p models/checkpoints/
 ```
 
-#### Flux-Schnell模型（超快速生成）
+#### Flux-Schnell模型（超快速生成）- 可选
 
 **下载选项：**
 1. **直接下载**：[Hugging Face - FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell)
@@ -93,16 +110,24 @@ mkdir -p models/clip/
 # CLIP模型通常包含在主模型中
 ```
 
-## 步骤3：下载LoRA模型（可选但推荐）
+## 步骤3：添加LoRA模型（可选）
 
-LoRA模型可以通过特定艺术风格增强图像生成效果。
+**使用任何您喜欢的LoRA！** LoRA模型可以通过特定艺术风格增强图像生成效果。
 
 ### 设置LoRA目录
 ```bash
 mkdir -p models/loras/
 ```
 
-### 推荐的LoRA来源
+### 添加您的LoRA
+
+1. 将任何您想要的LoRA文件下载到`models/loras/`
+2. 将它们添加到`ykgen/config/lora_config.json`配置中
+3. YKGen将自动检测并使用它们
+
+**注意**：YKGen附带一些预配置的LoRA作为示例，但您可以用任何您偏好的LoRA替换它们。
+
+### LoRA来源
 - [Hugging Face LoRA合集](https://huggingface.co/models?other=lora)
 - [CivitAI LoRA模型](https://civitai.com/models?type=LORA)
 
@@ -231,12 +256,20 @@ ComfyUI/
 └── [其他ComfyUI文件]
 ```
 
+## 使用您自己的模型
+
+**完全自由**：YKGen设计为与任何ComfyUI兼容的模型一起工作。配置文件只是示例：
+- `ykgen/config/image_model_config.json` - 添加您偏好的图像生成模型
+- `ykgen/config/lora_config.json` - 添加您偏好的LoRA风格
+
+**只需编辑这些文件即可使用您自己的模型而不是默认模型。**
+
 ## 下一步
 
 ComfyUI设置并运行后：
-1. 返回主KGen文档
+1. 返回主YKGen文档
 2. 使用API密钥配置您的`.env`文件
-3. 开始使用KGen生成精彩内容！
+3. 开始使用YKGen生成精彩内容！
 
 ## 支持
 
@@ -244,6 +277,6 @@ ComfyUI相关问题：
 - [ComfyUI GitHub仓库](https://github.com/comfyanonymous/ComfyUI)
 - [ComfyUI文档](https://github.com/comfyanonymous/ComfyUI#readme)
 
-KGen集成问题：
-- 查看主KGen文档
+YKGen集成问题：
+- 查看主YKGen文档
 - 查看上述故障排除部分
