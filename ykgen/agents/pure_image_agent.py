@@ -397,7 +397,6 @@ Output ONLY the formatted pinyin, no explanations."""
         """Generate multiple image prompts for a single scene using LLM.
         
         This ensures character descriptions remain consistent while varying other prompt elements.
-        
         Args:
             scene: The scene to generate prompts for
             
@@ -481,6 +480,8 @@ Requirements:
 5. Maintain the same overall scene and setting
 6. Each prompt should be suitable for high-quality image generation
 7. Format each prompt as a comma-separated list of descriptors
+
+important: if you generate the prompt related to a character, the character must be detailed described including the haircut, face description, body description, eye, etc(other detailed description), for the consistency of the character description in the prompt within a scene
 
 Return the prompts using the ScenePrompts tool."""
 

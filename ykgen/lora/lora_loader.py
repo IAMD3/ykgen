@@ -19,6 +19,35 @@ def get_lora_config_path() -> str:
     return str(config_path)
 
 
+def get_lora_key_for_model_type(model_type: str) -> str:
+    """Map model type to LoRA configuration key.
+    
+    Args:
+        model_type: Model type from CLI (e.g., 'flux-schnell', 'illustrious-vpred')
+                   or from image config (e.g., 'simple', 'vpred')
+    
+    Returns:
+        str: The corresponding LoRA configuration key
+    """
+    # Load the mapping from lora_config.json
+    try:
+        config = load_lora_config()
+        mapping = config.get("_model_mapping", {})
+        
+        # If it's already a valid LoRA key, return as-is
+        if model_type in config and model_type != "_model_mapping":
+            return model_type
+        
+        # Try to map from image config key to LoRA key
+        if model_type in mapping:
+            return mapping[model_type]
+        
+        # Fallback to flux-schnell for unknown types
+        return "flux-schnell"
+    except Exception:
+        # Fallback if config loading fails
+        return "flux-schnell"
+
 def load_lora_config() -> Dict[str, Any]:
     """
     Load the LoRA configuration from the JSON file.
@@ -43,17 +72,18 @@ def get_lora_options(model_type: str) -> Dict[str, Dict[str, Any]]:
     Get the available LoRA options for a specific model type.
     
     Args:
-        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred")
+        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred", "simple", "vpred")
         
     Returns:
         Dictionary of LoRA options for the specified model type
     """
     config = load_lora_config()
+    lora_key = get_lora_key_for_model_type(model_type)
     
-    if model_type not in config:
+    if lora_key not in config:
         raise ValueError(f"Unknown model type: {model_type}")
     
-    return config[model_type]["loras"]
+    return config[lora_key]["loras"]
 
 
 def get_model_description(model_type: str) -> str:
@@ -61,17 +91,18 @@ def get_model_description(model_type: str) -> str:
     Get the description for a specific model type.
     
     Args:
-        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred")
+        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred", "simple", "vpred")
         
     Returns:
         Description string for the model type
     """
     config = load_lora_config()
+    lora_key = get_lora_key_for_model_type(model_type)
     
-    if model_type not in config:
+    if lora_key not in config:
         raise ValueError(f"Unknown model type: {model_type}")
     
-    return config[model_type]["description"]
+    return config[lora_key]["description"]
 
 
 def get_lora_by_choice(model_type: str, choice: str) -> Optional[Dict[str, Any]]:
@@ -79,18 +110,19 @@ def get_lora_by_choice(model_type: str, choice: str) -> Optional[Dict[str, Any]]
     Get a specific LoRA configuration by user choice.
     
     Args:
-        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred")
+        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred", "simple", "vpred")
         choice: The user's choice (e.g., "1", "2", etc.)
         
     Returns:
         LoRA configuration dictionary or None if choice is invalid
     """
-    lora_options = get_lora_options(model_type)
+    lora_key = get_lora_key_for_model_type(model_type)
+    lora_options = get_lora_options(lora_key)
     
     if choice in lora_options:
         lora_config = lora_options[choice].copy()
         # Add model_type to the config for compatibility
-        lora_config["model_type"] = model_type
+        lora_config["model_type"] = lora_key
         return lora_config
     
     return None
@@ -101,19 +133,20 @@ def get_multiple_loras_by_choices(model_type: str, choices: List[str]) -> List[D
     Get multiple LoRA configurations by user choices.
     
     Args:
-        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred")
+        model_type: The model type (e.g., "flux-schnell", "illustrious-vpred", "simple", "vpred")
         choices: List of user choices (e.g., ["1", "3", "5"])
         
     Returns:
         List of LoRA configuration dictionaries
     """
     selected_loras = []
-    lora_options = get_lora_options(model_type)
+    lora_key = get_lora_key_for_model_type(model_type)
+    lora_options = get_lora_options(lora_key)
     
     for choice in choices:
         if choice in lora_options:
             lora_config = lora_options[choice].copy()
-            lora_config["model_type"] = model_type
+            lora_config["model_type"] = lora_key
             selected_loras.append(lora_config)
     
     return selected_loras
@@ -310,7 +343,8 @@ def get_available_model_types() -> List[str]:
         List of available model type strings
     """
     config = load_lora_config()
-    return list(config.keys())
+    # Filter out special configuration keys
+    return [key for key in config.keys() if not key.startswith("_")]
 
 
 def validate_lora_config() -> bool:
@@ -327,8 +361,12 @@ def validate_lora_config() -> bool:
         if not config:
             return False
         
-        # Check each model type
+        # Check each model type (skip special keys like _model_mapping)
         for model_type, model_config in config.items():
+            # Skip special configuration keys
+            if model_type.startswith("_"):
+                continue
+                
             if "description" not in model_config:
                 return False
             
@@ -369,4 +407,4 @@ def validate_lora_config() -> bool:
         return True
     
     except Exception:
-        return False 
+        return False

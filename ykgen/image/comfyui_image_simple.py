@@ -6,18 +6,79 @@ for generating images from scene descriptions using Flux models.
 """
 
 import copy
+import json
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .comfyui_image_base import ComfyUIImageClientBase
+from ..console import print_success
 from .. import Scene
 
 
-class ComfyUIClient4Flux(ComfyUIImageClientBase):
-    """Client for interacting with ComfyUI server for Flux models."""
+class ComfyUISimpleClient(ComfyUIImageClientBase):
+    """Client for interacting with ComfyUI server for simple models."""
+
+    def __init__(self, lora_config: Optional[Dict[str, Any]] = None, model_name: Optional[str] = None):
+        """Initialize the simple client with optional model configuration."""
+        super().__init__(lora_config=lora_config)
+        self.model_config = self._load_model_config(model_name)
+    
+    def _load_model_config(self, model_name: Optional[str] = None) -> Dict[str, Any]:
+        """Load model configuration from image_model_config.json."""
+        config_path = Path(__file__).parent.parent / "config" / "image_model_config.json"
+        
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            
+            simple_models = config.get("simple", {}).get("models", [])
+            
+            if model_name:
+                # Find specific model by name
+                for model in simple_models:
+                    if model.get("name") == model_name:
+                        return model
+                raise ValueError(f"Model '{model_name}' not found in configuration")
+            else:
+                # Find default model
+                for model in simple_models:
+                    if model.get("default", False):
+                        return model
+                # If no default, use first model
+                if simple_models:
+                    return simple_models[0]
+                
+            # Fallback to hardcoded values if config is missing
+            return {
+                "name": "Flux Schnell",
+                "checkpoint": "flux1-schnell-fp8.safetensors",
+                "steps": 4,
+                "cfg": 1,
+                "sampler_name": "euler",
+                "scheduler": "simple",
+                "denoise": 1,
+                "guidance": 3.5
+            }
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            print(f"Warning: Could not load model config: {e}. Using fallback values.")
+            return {
+                "name": "Flux Schnell",
+                "checkpoint": "flux1-schnell-fp8.safetensors",
+                "steps": 4,
+                "cfg": 1,
+                "sampler_name": "euler",
+                "scheduler": "simple",
+                "denoise": 1,
+                "guidance": 3.5
+            }
+    
+    def get_lora_config_key(self) -> str:
+        """Get the LoRA configuration key for this model."""
+        return self.model_config.get("lora_config_key", "flux-schnell")
 
     def get_default_lora_config(self) -> Dict[str, Any]:
-        """Get the default LoRA configuration for Flux."""
+        """Get the default LoRA configuration for simple models."""
         return {"name": "No LoRA", "file": None, "trigger": ""}
 
     def get_workflow_template(self) -> Dict[str, Any]:
@@ -47,18 +108,18 @@ class ComfyUIClient4Flux(ComfyUIImageClientBase):
                 "_meta": {"title": "EmptySD3LatentImage"},
             },
             "30": {
-                "inputs": {"ckpt_name": "flux1-schnell-fp8.safetensors"},
+                "inputs": {"ckpt_name": self.model_config.get("checkpoint", "flux1-schnell-fp8.safetensors")},
                 "class_type": "CheckpointLoaderSimple",
                 "_meta": {"title": "Load Checkpoint"},
             },
             "31": {
                 "inputs": {
                     "seed": None,  # Will be randomized
-                    "steps": 4,
-                    "cfg": 1,
-                    "sampler_name": "euler",
-                    "scheduler": "simple",
-                    "denoise": 1,
+                    "steps": self.model_config.get("steps", 4),
+                    "cfg": self.model_config.get("cfg", 1),
+                    "sampler_name": self.model_config.get("sampler_name", "euler"),
+                    "scheduler": self.model_config.get("scheduler", "simple"),
+                    "denoise": self.model_config.get("denoise", 1),
                     "model": ["38", 0],  # Connect to LoRA loader output
                     "positive": ["39", 0],  # Connect to FluxGuidance output
                     "negative": ["33", 0],
@@ -89,7 +150,7 @@ class ComfyUIClient4Flux(ComfyUIImageClientBase):
             "39": {
                 "inputs": {
                     "conditioning": ["6", 0],
-                    "guidance": 3.5,
+                    "guidance": self.model_config.get("guidance", 3.5),
                 },
                 "class_type": "FluxGuidance",
                 "_meta": {"title": "FluxGuidance"},
@@ -97,14 +158,14 @@ class ComfyUIClient4Flux(ComfyUIImageClientBase):
         }
 
     def get_resolutions(self) -> List[tuple[int, int]]:
-        """Get the available resolutions for Flux."""
+        """Get the available resolutions for simple models."""
         return [
-            (1024, 1024),  # Square (default for Flux)
+            (1024, 1024),  # Square (default for simple models)
         ]
 
     def get_model_name(self) -> str:
-        """Get the model name for Flux."""
-        return "Flux"
+        """Get the model name for simple models."""
+        return self.model_config.get("name", "Simple Model")
 
     def get_output_dir_suffix(self) -> str:
         """Get the suffix for output directory naming."""
@@ -113,7 +174,7 @@ class ComfyUIClient4Flux(ComfyUIImageClientBase):
     def create_prompt(
         self, positive_prompt: str, negative_prompt: str = "", resolution: Optional[tuple[int, int]] = None
     ) -> Dict[str, Any]:
-        """Create a Flux workflow prompt from text prompts with LoRA support."""
+        """Create a simple model workflow prompt from text prompts with LoRA support."""
         prompt = copy.deepcopy(self.get_workflow_template())
 
         # Set seed if provided in lora_config
@@ -288,5 +349,5 @@ def generate_images_for_scenes(
     Returns:
         List of paths to generated image files
     """
-    client = ComfyUIClient4Flux(lora_config=lora_config)
+    client = ComfyUISimpleClient(lora_config=lora_config)
     return client.generate_scene_images(scenes, output_dir)

@@ -4,8 +4,9 @@ This package contains image generation components including ComfyUI integrations
 and group mode image generation functionality.
 """
 
-from .comfyui_image_flux import ComfyUIClient4Flux, generate_images_for_scenes
-from .comfyui_image_illustrious import ComfyUIIllustriousClient, generate_illustrious_images_for_scenes
+from .comfyui_image_simple import ComfyUISimpleClient, generate_images_for_scenes
+from .comfyui_image_vpred import ComfyUIVPredClient
+from .comfyui_image_vpred import generate_illustrious_images_for_scenes
 # WAI client removed
 from .group_mode_image_generator import (
     generate_images_for_scenes_group_mode,
@@ -17,9 +18,10 @@ from .group_mode_image_generator import (
 
 __all__ = [
     # ComfyUI Image Generation
-    "ComfyUIClient4Flux",
+    "ComfyUISimpleClient",
+    "ComfyUIVPredClient",
     "generate_images_for_scenes",
-    "ComfyUIIllustriousClient",
+    # "ComfyUIIllustriousClient", # Renamed to ComfyUIVPredClient
     "generate_illustrious_images_for_scenes",
     # WAI client exports removed
     # Group Mode Image Generation

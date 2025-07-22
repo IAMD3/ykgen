@@ -1,0 +1,48 @@
+{
+  "simple": {
+    "models": [
+      {
+        "name": "Flux Schnell",
+        "checkpoint": "flux1-schnell-fp8.safetensors",
+        "steps": 4,
+        "cfg": 1,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "denoise": 1,
+        "guidance": 3.5,
+        "lora_config_key": "flux-schnell",
+        "default": true
+      },
+      {
+        "name": "Example New Model",
+        "checkpoint": "example-new-model.safetensors",
+        "steps": 8,
+        "cfg": 2,
+        "sampler_name": "dpmpp_2m",
+        "scheduler": "karras",
+        "denoise": 1,
+        "guidance": 4.0,
+        "lora_config_key": "flux-schnell",
+        "default": false
+      }
+    ]
+  },
+  "vpred": {
+    "models": [
+      {
+        "name": "Illustrious vPred",
+        "checkpoint": "noobaiXLNAIXL_vPred10Version.safetensors",
+        "steps": 26,
+        "cfg": 5,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
+        "denoise": 1,
+        "sampling": "v_prediction",
+        "zsnr": true,
+        "rescale_cfg_multiplier": 0.6,
+        "lora_config_key": "illustrious-vpred",
+        "default": true
+      }
+    ]
+  }
+}

@@ -11,8 +11,8 @@ from typing import List, Dict, Any, Optional
 from ykgen.lora.lora_selector import select_loras_for_scenes, select_loras_for_all_scenes_optimized
 from ..providers import get_llm
 from ..console import status_update, print_success, print_warning
-from .comfyui_image_flux import ComfyUIClient4Flux
-from .comfyui_image_illustrious import ComfyUIIllustriousClient
+from .comfyui_image_simple import ComfyUISimpleClient
+from .comfyui_image_vpred import ComfyUIVPredClient
 
 
 def generate_images_for_scenes_group_mode_optimized(
@@ -75,12 +75,12 @@ def generate_images_for_scenes_group_mode_optimized(
         try:
             if model_type == "illustrious-vpred":
                 # Use Illustrious model
-                client = ComfyUIIllustriousClient(lora_config=story_lora_config)
+                client = ComfyUIVPredClient(lora_config=story_lora_config)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
             # illustrious-alt model option removed
             else:
                 # Use Flux model
-                client = ComfyUIClient4Flux(lora_config=story_lora_config)
+                client = ComfyUISimpleClient(lora_config=story_lora_config)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
             
             image_paths.extend(scene_image_paths)
@@ -150,12 +150,12 @@ def generate_images_for_scenes_group_mode(
         try:
             if model_type == "illustrious-vpred":
                 # Use Illustrious model
-                client = ComfyUIIllustriousClient(lora_config=lora_config)
+                client = ComfyUIVPredClient(lora_config=lora_config)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
             # illustrious-alt model option removed
             else:
                 # Use Flux model
-                client = ComfyUIClient4Flux(lora_config=lora_config)
+                client = ComfyUISimpleClient(lora_config=lora_config)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
             
             image_paths.extend(scene_image_paths)
@@ -194,7 +194,7 @@ def generate_images_for_scenes_all_mode(
     try:
         if model_type == "illustrious-vpred":
             # Import here to avoid circular imports
-            from .comfyui_image_illustrious import generate_illustrious_images_for_scenes
+            from .comfyui_image_vpred import generate_illustrious_images_for_scenes
             image_paths = generate_illustrious_images_for_scenes(
                 scenes=scenes,
                 lora_config=lora_config,
@@ -203,7 +203,7 @@ def generate_images_for_scenes_all_mode(
         # illustrious-alt model option removed
         else:
             # Import here to avoid circular imports
-            from .comfyui_image_flux import generate_images_for_scenes
+            from .comfyui_image_simple import generate_images_for_scenes
             image_paths = generate_images_for_scenes(
                 scenes=scenes,
                 lora_config=lora_config,

@@ -6,18 +6,83 @@ for generating images from scene descriptions using Illustrious vPred models.
 """
 
 import copy
+import json
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .comfyui_image_base import ComfyUIImageClientBase
+from ..console import print_success
 from .. import Scene
 
 
-class ComfyUIIllustriousClient(ComfyUIImageClientBase):
-    """Client for interacting with ComfyUI server for Illustrious vPred models."""
+class ComfyUIVPredClient(ComfyUIImageClientBase):
+    """Client for interacting with ComfyUI server for vPred models."""
+
+    def __init__(self, lora_config: Optional[Dict[str, Any]] = None, model_name: Optional[str] = None):
+        """Initialize the vPred client with optional model configuration."""
+        super().__init__(lora_config=lora_config)
+        self.model_config = self._load_model_config(model_name)
+    
+    def _load_model_config(self, model_name: Optional[str] = None) -> Dict[str, Any]:
+        """Load model configuration from image_model_config.json."""
+        config_path = Path(__file__).parent.parent / "config" / "image_model_config.json"
+        
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+            
+            vpred_models = config.get("vpred", {}).get("models", [])
+            
+            if model_name:
+                # Find specific model by name
+                for model in vpred_models:
+                    if model.get("name") == model_name:
+                        return model
+                raise ValueError(f"Model '{model_name}' not found in configuration")
+            else:
+                # Find default model
+                for model in vpred_models:
+                    if model.get("default", False):
+                        return model
+                # If no default, use first model
+                if vpred_models:
+                    return vpred_models[0]
+                
+            # Fallback to hardcoded values if config is missing
+            return {
+                "name": "Illustrious vPred",
+                "checkpoint": "noobaiXLNAIXL_vPred10Version.safetensors",
+                "steps": 26,
+                "cfg": 5,
+                "sampler_name": "euler_ancestral",
+                "scheduler": "normal",
+                "denoise": 1,
+                "sampling": "v_prediction",
+                "zsnr": True,
+                "rescale_cfg_multiplier": 0.6
+            }
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            print(f"Warning: Could not load model config: {e}. Using fallback values.")
+            return {
+                "name": "Illustrious vPred",
+                "checkpoint": "noobaiXLNAIXL_vPred10Version.safetensors",
+                "steps": 26,
+                "cfg": 5,
+                "sampler_name": "euler_ancestral",
+                "scheduler": "normal",
+                "denoise": 1,
+                "sampling": "v_prediction",
+                "zsnr": True,
+                "rescale_cfg_multiplier": 0.6
+            }
+    
+    def get_lora_config_key(self) -> str:
+        """Get the LoRA configuration key for this model."""
+        return self.model_config.get("lora_config_key", "illustrious-vpred")
 
     def get_default_lora_config(self) -> Dict[str, Any]:
-        """Get the default LoRA configuration for Illustrious."""
+        """Get the default LoRA configuration for vPred models."""
         return {
             "name": "Elena Kimberlite (Character)",
             "file": "Elena_Kimberlite_(Character)_ILXL.safetensors",
@@ -30,11 +95,11 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             "3": {
                 "inputs": {
                     "seed": None,  # Will be randomized
-                    "steps": 26,
-                    "cfg": 5,
-                    "sampler_name": "euler_ancestral",
-                    "scheduler": "normal",
-                    "denoise": 1,
+                    "steps": self.model_config.get("steps", 26),
+                    "cfg": self.model_config.get("cfg", 5),
+                    "sampler_name": self.model_config.get("sampler_name", "euler_ancestral"),
+                    "scheduler": self.model_config.get("scheduler", "normal"),
+                    "denoise": self.model_config.get("denoise", 1),
                     "model": ["27", 0],
                     "positive": ["6", 0],
                     "negative": ["7", 0],
@@ -45,7 +110,7 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             },
             "4": {
                 "inputs": {
-                    "ckpt_name": "noobaiXLNAIXL_vPred10Version.safetensors"
+                    "ckpt_name": self.model_config.get("checkpoint", "noobaiXLNAIXL_vPred10Version.safetensors")
                 },
                 "class_type": "CheckpointLoaderSimple",
                 "_meta": {"title": "Load Checkpoint"}
@@ -104,8 +169,8 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             },
             "46": {
                 "inputs": {
-                    "sampling": "v_prediction",
-                    "zsnr": True,
+                    "sampling": self.model_config.get("sampling", "v_prediction"),
+                    "zsnr": self.model_config.get("zsnr", True),
                     "model": ["4", 0]
                 },
                 "class_type": "ModelSamplingDiscrete",
@@ -113,7 +178,7 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
             },
             "47": {
                 "inputs": {
-                    "multiplier": 0.6,
+                    "multiplier": self.model_config.get("rescale_cfg_multiplier", 0.6),
                     "model": ["46", 0]
                 },
                 "class_type": "RescaleCFG",
@@ -122,7 +187,7 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
         }
 
     def get_resolutions(self) -> List[tuple[int, int]]:
-        """Get the available resolutions for Illustrious."""
+        """Get the available resolutions for vPred models."""
         return [
             (768, 1344),   # Portrait
             (832, 1216),   # Portrait
@@ -134,8 +199,8 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
         ]
 
     def get_model_name(self) -> str:
-        """Get the model name for Illustrious."""
-        return "Illustrious vPred"
+        """Get the model name for vPred models."""
+        return self.model_config.get("name", "vPred Model")
 
     def get_output_dir_suffix(self) -> str:
         """Get the suffix for output directory naming."""
@@ -144,7 +209,7 @@ class ComfyUIIllustriousClient(ComfyUIImageClientBase):
     def create_prompt(
         self, positive_prompt: str, negative_prompt: str = "", resolution: Optional[tuple[int, int]] = None
     ) -> Dict[str, Any]:
-        """Create an Illustrious workflow prompt from text prompts with LoRA support."""
+        """Create a vPred workflow prompt from text prompts with LoRA support."""
         prompt = copy.deepcopy(self.get_workflow_template())
         
         # Set seed if provided in lora_config
@@ -328,5 +393,5 @@ def generate_illustrious_images_for_scenes(
     Returns:
         List of paths to generated image files
     """
-    client = ComfyUIIllustriousClient(lora_config=lora_config)
+    client = ComfyUIVPredClient(lora_config=lora_config)
     return client.generate_scene_images(scenes, output_dir)
