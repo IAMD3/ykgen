@@ -11,11 +11,32 @@
         "denoise": 1,
         "guidance": 3.5,
         "lora_config_key": "flux-schnell",
-        "default": true
+        "default": false
       },
           {
         "name": "WaiNSFW Illustrious",
         "checkpoint": "waiNSFWIllustrious_v120.safetensors",
+        "steps": 26,
+        "cfg": 7.0,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
+        "denoise": 1,
+        "lora_config_key": "wai-illustrious",
+        "default": true
+      },
+        {
+        "name": "Chinese style",
+        "checkpoint": "Gufeng_v20.safetensors",
+        "steps": 20,
+        "cfg": 6.0,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
+        "denoise": 1,
+        "lora_config_key": "gufeng(undefined)",
+        "default": false
+      }, {
+        "name": "illustrious-xl standard",
+        "checkpoint": "illustriousXL_v01.safetensors",
         "steps": 26,
         "cfg": 7.0,
         "sampler_name": "euler_ancestral",
@@ -40,7 +61,7 @@
         "zsnr": true,
         "rescale_cfg_multiplier": 0.6,
         "lora_config_key": "illustrious-vpred",
-        "default": true
+        "default": false
       }
     ]
   }
