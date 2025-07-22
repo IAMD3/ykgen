@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .comfyui_image_base import ComfyUIImageClientBase
+from ..console import print_success
 from .. import Scene
 
 
@@ -20,7 +21,7 @@ class ComfyUIVPredClient(ComfyUIImageClientBase):
 
     def __init__(self, lora_config: Optional[Dict[str, Any]] = None, model_name: Optional[str] = None):
         """Initialize the vPred client with optional model configuration."""
-        super().__init__(lora_config)
+        super().__init__(lora_config=lora_config)
         self.model_config = self._load_model_config(model_name)
     
     def _load_model_config(self, model_name: Optional[str] = None) -> Dict[str, Any]:

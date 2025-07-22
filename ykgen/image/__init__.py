@@ -4,7 +4,6 @@ This package contains image generation components including ComfyUI integrations
 and group mode image generation functionality.
 """
 
-from .comfyui_image_flux import ComfyUIClient4Flux
 from .comfyui_image_simple import ComfyUISimpleClient, generate_images_for_scenes
 from .comfyui_image_vpred import ComfyUIVPredClient
 from .comfyui_image_vpred import generate_illustrious_images_for_scenes
@@ -19,7 +18,6 @@ from .group_mode_image_generator import (
 
 __all__ = [
     # ComfyUI Image Generation
-    "ComfyUIClient4Flux",
     "ComfyUISimpleClient",
     "ComfyUIVPredClient",
     "generate_images_for_scenes",

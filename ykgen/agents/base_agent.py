@@ -129,7 +129,8 @@ class BaseAgent(ABC):
             "EXAMPLE OF HIGH-QUALITY PROMPTS:\n"
             "Positive prompt: 1girl, saber alter, weapon, artoria pendragon \\(fate\\), armor, sword, excalibur morgan \\(fate\\), solo, armored dress, holding sword, holding weapon, holding, blonde hair, gauntlets, yellow eyes, dress, breastplate, braid, masterpiece, best quality, newest, absurdres, highres, very awa\n"
             "Negative prompt: low quality, worst quality, normal quality, text, signature, jpeg artifacts, bad anatomy, old, early\n\n"
-            "Follow this format and quality level for all prompts you generate."
+            "Follow this format and quality level for all prompts you generate. "
+            "important: if you generate the prompt related to a character, the character must be detailed described including the haircut, face description, body description, eye, etc(other detailed description)"
         )
 
         # Build LoRA trigger words context
