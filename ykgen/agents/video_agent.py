@@ -14,6 +14,7 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 
 from .base_agent import BaseAgent
+from ..config.model_types import get_model_display_name
 from ..audio import generate_story_audio
 from ..video import wait_for_all_videos, generate_videos_from_images
 from ykgen.config.config import config
@@ -352,7 +353,7 @@ class VideoAgent(BaseAgent):
     def generate_images(self, state: VisionState) -> VisionState:
         """Generate images for the scenes using ComfyUI and selected model with adaptive LoRA mode."""
         model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = "Illustrious vPred" if model_type in ["illustrious-vpred", "wai-illustrious"] else "Flux-Schnell"
+        model_name = get_model_display_name(model_type)
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')
@@ -380,7 +381,7 @@ class VideoAgent(BaseAgent):
             image_paths = generate_images_for_scenes_adaptive_optimized(
                 scenes=state["scenes"],
                 lora_config=self.lora_config,
-    
+                model_name=model_name
             )
                 
             print_success(f"Successfully generated {len(image_paths)} images with {model_name}")

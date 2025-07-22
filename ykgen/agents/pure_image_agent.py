@@ -16,6 +16,7 @@ from langgraph.constants import END
 from langgraph.graph import StateGraph
 
 from .base_agent import BaseAgent
+from ..config.model_types import get_model_display_name
 from ykgen.config.config import config
 from ..console import (
     print_success,
@@ -541,7 +542,7 @@ Return the prompts using the ScenePrompts tool."""
     def generate_multiple_images(self, state: VisionState) -> VisionState:
         """Generate multiple images per scene using ComfyUI and selected model with adaptive LoRA mode."""
         model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = "Illustrious vPred" if model_type in ["illustrious-vpred", "wai-illustrious"] else "Flux-Schnell"
+        model_name = get_model_display_name(model_type)
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')
@@ -614,7 +615,7 @@ Return the prompts using the ScenePrompts tool."""
                         scenes=single_scene,
                         lora_config=lora_config_with_seed,
                         output_dir=output_dir,
-            
+                        model_name=model_name
                     )
                     
                     # Add the generated image path
