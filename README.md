@@ -1,5 +1,5 @@
 # YKGen 
-##  AI Image & Video Generator
+##  AI Image & Video Generator - Comfyui && LLM Orchestrator
 
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 
@@ -26,14 +26,46 @@ YKGen is an AI generation content tool that transforms simple text prompts into 
   * log all the related info for reproduceable regeneration
   * "smart" lora selection (group mode, an extra llm call for selection)
 
+### Sample Generated Images(within a scene)
 
-### Interactive Mode
+**Scene 001 - Image 01:**
+![Scene 001 Image 01](./example/scene_001_image_01.png)
+
+*generated prompt:* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, viewed from a low angle to emphasize speed and height, backpack bouncing mid-air, phone buzzing in her pocket, golden retriever leaping into the frame, sidewalk with morning light casting long shadows, urban setting, determined expression, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, motion blur on her legs, mid-action freeze`
+
+**Scene 001 - Image 02:**
+![Scene 001 Image 02](./example/scene_001_image_02.png)
+
+*generated prompt:* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, close-up side view, focusing on her determined face and the phone buzzing in her pocket, backpack straps loose and flying, golden retriever in the background blurred, sidewalk with crisp autumn leaves scattering, urban setting, morning light warming the scene, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, shallow depth of field`
+
+
+### quick start
 
 The simplest way to use YKGen is through its interactive CLI:
-
 ```bash
 # Start YKGen
 uv run python main.py
+```
+
+notice: 
+* you need to set up comfyui before use, no worry it is the only external service relied on
+* configure the .env as below:
+
+#### Configuration
+Create a `.env` file with your API keys, or rename env.example to `.env`:
+
+```env
+# Required API Keys
+LLM_API_KEY=your_llm_api_key_here
+LLM_BASE_URL=https://api.your-provider.com/v1
+LLM_MODEL=your_model_name
+SILICONFLOW_VIDEO_KEY=your_siliconflow_video_key_here
+
+
+# Optional Settings
+COMFYUI_HOST=127.0.0.1
+COMFYUI_PORT=8188
+MAX_SCENES=3
 ```
 
 The system will guide you through:
@@ -44,25 +76,24 @@ The system will guide you through:
 5. Watching the generation process with real-time progress display
 
 
+## ComfyUI Integration (the only external dependency)
 
-## ComfyUI Integration
-
-YKGen relies on ComfyUI for high-quality image generation. ComfyUI setup requires downloading large AI models and proper configuration.
+YKGen relies on ComfyUI for  image generation. ComfyUI setup requires downloading large AI models and proper configuration.
 
 **📖 Complete Setup Guide**: [ComfyUI Setup Guide](COMFYUI_SETUP.md)
 
 The setup guide covers:
 - ComfyUI installation and configuration
-- Required model downloads (Flux-Schnell, Illustrious-vPred)
-- LoRA model setup for enhanced styles
+- model downloads (Flux-Schnell, Illustrious-vPred or any model you prefered)
+- LoRA any model setup for enhanced styles (recommend download from civitai)
 - Performance optimization
 - Troubleshooting common issues
 
-**Quick Start**: Once ComfyUI is running on `http://127.0.0.1:8188`, YKGen will automatically connect and use it for image generation.
-
+Once ComfyUI is running on `http://127.0.0.1:8188`, YKGen will automatically connect and use it for image generation, you can modify the `COMFYUI_HOST` and `COMFYUI_PORT` in `.env` file to use other comfyui server
 
 ## Technology Stack
 
+- **Consitancy**: same seed, prompt, lora, etc
 - **Language Models**: openai standard LLM for story generation and creative tasks
 - **Image Generation**: ComfyUI with Flux-Schnell (ultra-fast) or Illustrious-vPred (anime-style)
 - **Video Generation**: SiliconFlow (Wan2.1 I2V)
@@ -82,25 +113,8 @@ The setup guide covers:
 - API keys for LLM and video providers (SiliconFlow)
 
 
-## Configuration
-
-Create a `.env` file with your API keys:
-
-```env
-# Required API Keys
-LLM_API_KEY=your_llm_api_key_here
-LLM_BASE_URL=https://api.your-provider.com/v1
-LLM_MODEL=your_model_name
-SILICONFLOW_VIDEO_KEY=your_siliconflow_video_key_here
 
 
-# Optional Settings
-COMFYUI_HOST=127.0.0.1
-COMFYUI_PORT=8188
-MAX_SCENES=3
-```
-
-## Usage
 
 ## Agent Types
 
@@ -234,17 +248,6 @@ Each generation creates a timestamped directory with:
 - Background audio
 - Final combined video
 
-### Sample Generated Images(within a scene)
-
-**Scene 001 - Image 01:**
-![Scene 001 Image 01](./example/scene_001_image_01.png)
-
-*generated prompt:* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, viewed from a low angle to emphasize speed and height, backpack bouncing mid-air, phone buzzing in her pocket, golden retriever leaping into the frame, sidewalk with morning light casting long shadows, urban setting, determined expression, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, motion blur on her legs, mid-action freeze`
-
-**Scene 001 - Image 02:**
-![Scene 001 Image 02](./example/scene_001_image_02.png)
-
-*generated prompt:* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, close-up side view, focusing on her determined face and the phone buzzing in her pocket, backpack straps loose and flying, golden retriever in the background blurred, sidewalk with crisp autumn leaves scattering, urban setting, morning light warming the scene, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, shallow depth of field`
 
 ## Next Stage Roadmap
 

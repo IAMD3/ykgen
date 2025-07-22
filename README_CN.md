@@ -8,8 +8,9 @@
 
 ## 项目介绍
 
-我尝试过很多 AI GC方案，但大多数要么过于复杂，要么整合性较弱。如果直接使用 ComfyUI 并配合复杂的工作流，实在是太麻烦了。YKGen  —— 将 ComfyUI、LLM和代码简单地结合在一起。
-
+```start
+我尝试过很多AI生成解决方案，但大多数要么过于复杂，要么功能不足。而直接使用ComfyUI配合复杂工作流又太困难和麻烦。这就是我创建YKGen的原因——简单地将ComfyUI与LLM和代码结合起来。
+```
 
 YKGen是一个AI生成内容工具，能够将简单的文本提示转换为完整的AI生成故事，包含图像和视频，创造一致且无缝的故事体验。
   * 文本故事生成
@@ -24,60 +25,32 @@ YKGen是一个AI生成内容工具，能够将简单的文本提示转换为完�
   * 记录所有相关信息以便重复再生成
   * "智能"LoRA选择（分组模式，额外的LLM调用进行选择）
 
-### 交互模式
+### 生成图像示例（同一场景内）
+
+**场景 001 - 图像 01：**
+![场景 001 图像 01](./example/scene_001_image_01.png)
+
+*生成的提示词：* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, viewed from a low angle to emphasize speed and height, backpack bouncing mid-air, phone buzzing in her pocket, golden retriever leaping into the frame, sidewalk with morning light casting long shadows, urban setting, determined expression, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, motion blur on her legs, mid-action freeze`
+
+**场景 001 - 图像 02：**
+![场景 001 图像 02](./example/scene_001_image_02.png)
+
+*生成的提示词：* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, close-up side view, focusing on her determined face and the phone buzzing in her pocket, backpack straps loose and flying, golden retriever in the background blurred, sidewalk with crisp autumn leaves scattering, urban setting, morning light warming the scene, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, shallow depth of field`
+
+### 快速开始
 
 使用YKGen最简单的方式是通过其交互式CLI：
-
 ```bash
 # 启动YKGen
 uv run python main.py
 ```
 
-系统将引导您完成：
-1. 选择代理类型（VideoAgent、PoetryAgent或PureImageAgent）
-2. 如果选择视频代理，选择视频提供商（SiliconFlow）
-3. 选择LoRA模型进行图像风格增强
-4. 输入您的创意提示
-5. 观看实时进度显示的生成过程
+注意：
+* 使用前需要设置ComfyUI，不用担心这是唯一依赖的外部服务
+* 按以下方式配置.env文件：
 
-## ComfyUI集成
-
-YKGen依赖ComfyUI进行高质量图像生成。ComfyUI设置需要下载大型AI模型和正确配置。
-
-**📖 完整设置指南**：[ComfyUI设置指南](COMFYUI_SETUP_CN.md)
-
-设置指南涵盖：
-- ComfyUI安装和配置
-- 必需模型下载（Flux-Schnell、Illustrious-vPred）
-- LoRA模型设置以增强风格
-- 性能优化
-- 常见问题故障排除
-
-**快速开始**：一旦ComfyUI在`http://127.0.0.1:8188`运行，YKGen将自动连接并使用它进行图像生成。
-
-## 技术栈
-
-- **语言模型**：DeepSeek-R1用于故事生成和创意任务
-- **图像生成**：ComfyUI配合Flux-Schnell（超快速）或Illustrious-vPred（动漫风格）
-- **视频生成**：SiliconFlow（Wan2.1 I2V）
-- **音频合成**：ACE TTS用于背景音乐
-- **包管理**：uv用于现代Python依赖管理
-- **编排**：LangGraph用于AI工作流管理
-- **视频处理**：FFmpeg用于专业视频组装
-
-## 安装
-
-### 先决条件
-
-- Python 3.13+
-- [uv](https://docs.astral.sh/uv/)包管理器
-- 带有所需模型的ComfyUI服务器（[设置指南](COMFYUI_SETUP.md)）
-- FFmpeg
-- DeepSeek和视频提供商（SiliconFlow）的API密钥
-
-## 配置
-
-创建包含您的API密钥的`.env`文件：
+#### 配置
+创建包含您的API密钥的`.env`文件，或将env.example重命名为`.env`：
 
 ```env
 # 必需的API密钥
@@ -92,6 +65,49 @@ COMFYUI_HOST=127.0.0.1
 COMFYUI_PORT=8188
 MAX_SCENES=3
 ```
+
+系统将引导您完成：
+1. 选择代理类型（VideoAgent、PoetryAgent或PureImageAgent）
+2. 如果选择视频代理，选择视频提供商（SiliconFlow）
+3. 选择LoRA模型进行图像风格增强
+4. 输入您的创意提示
+5. 观看实时进度显示的生成过程
+
+## ComfyUI集成（唯一的外部依赖）
+
+YKGen依赖ComfyUI进行图像生成。ComfyUI设置需要下载大型AI模型和正确配置。
+
+**📖 完整设置指南**：[ComfyUI设置指南](COMFYUI_SETUP_CN.md)
+
+设置指南涵盖：
+- ComfyUI安装和配置
+- 模型下载（Flux-Schnell、Illustrious-vPred或您偏好的任何模型）
+- LoRA任何模型设置以增强风格（推荐从civitai下载）
+- 性能优化
+- 常见问题故障排除
+
+一旦ComfyUI在`http://127.0.0.1:8188`运行，YKGen将自动连接并使用它进行图像生成，您可以在`.env`文件中修改`COMFYUI_HOST`和`COMFYUI_PORT`来使用其他ComfyUI服务器
+
+## 技术栈
+
+- **一致性**：相同种子、提示、LoRA等
+- **语言模型**：OpenAI标准LLM用于故事生成和创意任务
+- **图像生成**：ComfyUI配合Flux-Schnell（超快速）或Illustrious-vPred（动漫风格）
+- **视频生成**：SiliconFlow（Wan2.1 I2V）
+- **音频合成**：ACE TTS用于背景音乐
+- **包管理**：uv用于现代Python依赖管理
+- **编排**：LangGraph用于AI工作流管理
+- **视频处理**：FFmpeg用于视频组装
+
+## 安装
+
+### 先决条件
+
+- Python 3.13+
+- [uv](https://docs.astral.sh/uv/)包管理器
+- 带有所需模型的ComfyUI服务器（[设置指南](COMFYUI_SETUP.md)）
+- FFmpeg
+- LLM和视频提供商（SiliconFlow）的API密钥
 
 ## 使用方法
 
@@ -114,28 +130,22 @@ MAX_SCENES=3
 - 添加带有拼音声乐的传统音乐
 
 ### PureImageAgent
-专注于图像生成的代理：
-- 生成故事和场景
-- 为每个场景创建多张图像（1-10张）
+仅生成图像，具有以下选项：
+- 每个场景多张图像（1-10张）
 - 可选音频生成
 - 音频语言选择（英语或中文）
 - 将视频提示保存到文本文件以供手动视频创建
+- 场景内一致的图像
 
 ## LoRA模型增强
 
 YKGen支持用于专业艺术风格的LoRA模型：
 
-### Flux-Schnell（默认）
-- 超快4步生成（每张图像约1-2秒）
-- 8种专业LoRA选项（像素艺术、动漫、水彩等）
-
-### Illustrious-vPred
-- 高质量动漫/漫画风格生成
-- 用于详细动漫视觉效果的角色特定LoRA
 
 ### LoRA选择模式
 - **全部模式**：将所有选定的LoRA应用于每张图像
 - **分组模式**：AI智能为每个场景选择适当的LoRA
+- **无模式**：不应用LoRA
 
 ## 高级功能
 
@@ -230,18 +240,6 @@ YKGen采用多种技术来保持生成内容的视觉一致性：
 - 每个场景的视频片段
 - 背景音频
 - 最终合并的视频
-
-### 生成图像示例(同一场景)
-
-**场景 001 - 图像 01：**
-![场景 001 图像 01](./example/scene_001_image_01.png)
-
-*提示词：* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, viewed from a low angle to emphasize speed and height, backpack bouncing mid-air, phone buzzing in her pocket, golden retriever leaping into the frame, sidewalk with morning light casting long shadows, urban setting, determined expression, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, motion blur on her legs, mid-action freeze`
-
-**场景 001 - 图像 02：**
-![场景 001 图像 02](./example/scene_001_image_02.png)
-
-*提示词：* `1girl, Maddie, high school student, energetic, chaotic morning, sprinting, dynamic motion, close-up side view, focusing on her determined face and the phone buzzing in her pocket, backpack straps loose and flying, golden retriever in the background blurred, sidewalk with crisp autumn leaves scattering, urban setting, morning light warming the scene, flowing hair, school uniform, vibrant colors, masterpiece, best quality, newest, absurdres, highres, very detailed, shallow depth of field`
 
 ## 下一阶段路线图
 
