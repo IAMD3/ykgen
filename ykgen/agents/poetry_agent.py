@@ -415,7 +415,7 @@ between scenes in terms of characters and the poetic environment described."""
     def generate_images(self, state: VisionState) -> VisionState:
         """Generate images for the scenes using ComfyUI and selected model with adaptive LoRA mode."""
         model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = "Illustrious vPred" if model_type == "illustrious-vpred" else "Flux-Schnell"
+        model_name = "Illustrious vPred" if model_type in ["illustrious-vpred", "wai-illustrious"] else "Flux-Schnell"
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')
@@ -531,7 +531,7 @@ between scenes in terms of characters and the poetic environment described."""
     def generate_multiple_images(self, state: VisionState) -> VisionState:
         """Generate multiple images per scene for pure image mode using ComfyUI and selected model with adaptive LoRA mode."""
         model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = "Illustrious vPred" if model_type == "illustrious-vpred" else "Flux-Schnell"
+        model_name = "Illustrious vPred" if model_type in ["illustrious-vpred", "wai-illustrious"] else "Flux-Schnell"
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')

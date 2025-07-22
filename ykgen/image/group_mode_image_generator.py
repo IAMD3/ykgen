@@ -73,7 +73,7 @@ def generate_images_for_scenes_group_mode_optimized(
         
         # Generate image for this scene with the story-wide selected LoRAs
         try:
-            if model_type == "illustrious-vpred":
+            if model_type in ["illustrious-vpred", "wai-illustrious"]:
                 # Use Illustrious model
                 client = ComfyUIVPredClient(lora_config=story_lora_config)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
@@ -148,7 +148,7 @@ def generate_images_for_scenes_group_mode(
         
         # Generate image for this scene with the selected LoRAs
         try:
-            if model_type == "illustrious-vpred":
+            if model_type in ["illustrious-vpred", "wai-illustrious"]:
                 # Use Illustrious model
                 client = ComfyUIVPredClient(lora_config=lora_config)
                 scene_image_paths = client.generate_scene_images(single_scene, output_dir)
@@ -192,7 +192,7 @@ def generate_images_for_scenes_all_mode(
     
     # Generate images using the traditional method
     try:
-        if model_type == "illustrious-vpred":
+        if model_type in ["illustrious-vpred", "wai-illustrious"]:
             # Import here to avoid circular imports
             from .comfyui_image_vpred import generate_illustrious_images_for_scenes
             image_paths = generate_illustrious_images_for_scenes(
