@@ -352,8 +352,23 @@ class VideoAgent(BaseAgent):
 
     def generate_images(self, state: VisionState) -> VisionState:
         """Generate images for the scenes using ComfyUI and selected model with adaptive LoRA mode."""
-        model_type = self.lora_config.get("model_type", "flux-schnell") if self.lora_config else "flux-schnell"
-        model_name = get_model_display_name(model_type)
+        # Get the lora_config_key from lora_config, which is used to determine the model
+        lora_key = self.lora_config.get("model_type")
+        
+        # Convert lora_config_key to actual model name for display and model lookup
+        from ykgen.config.image_model_loader import find_model_by_name, get_all_model_names
+        
+        # Find the model that uses this lora_config_key
+        model_name = None
+        for name in get_all_model_names():
+            model_config = find_model_by_name(name)
+            if model_config and model_config.get("lora_config_key") == lora_key:
+                model_name = name
+                break
+        
+        # Fallback to a default model if no match found
+        if not model_name:
+           raise EnvironmentError("model config error")
         
         # Check if we're in group mode or all mode
         lora_mode = getattr(self, 'lora_mode', 'all')

@@ -186,7 +186,11 @@ class CLI:
             video_provider = self._get_video_provider(agent_type)
             model_type = self._get_model_type()
             lora_mode = self._get_lora_mode()
-            lora_config = self._get_lora_config(model_type, lora_mode)
+            
+            # Convert model name to lora_config_key for LoRA selection
+            from ykgen.lora.lora_loader import get_lora_key_for_model_type
+            lora_key = get_lora_key_for_model_type(model_type)
+            lora_config = self._get_lora_config(lora_key, lora_mode)
             
             # Get image and audio settings for image-only agents
             images_per_scene = 1
