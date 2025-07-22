@@ -4,9 +4,13 @@ This guide will help you set up ComfyUI for use with KGen's image generation cap
 
 ## Overview
 
-KGen supports two main image generation models through ComfyUI:
+YKGen supports configurable image generation models through ComfyUI. You can configure models in `ykgen/config/image_model_config.json` and LoRAs in `ykgen/config/lora_config.json`.
+
+### Suggested Models (Optional)
 - **Flux-Schnell**: Ultra-fast generation (1-2 seconds per image)
+- **WaiNSFW Illustrious**: High-quality NSFW-capable illustrative style (default)
 - **Illustrious-vPred**: High-quality anime/manga style generation
+- **Custom Models**: Add your own by editing the configuration files
 
 ## Prerequisites
 
@@ -44,16 +48,26 @@ source comfyui_env/bin/activate  # On Windows: comfyui_env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Step 2: Download Required Models
+## Step 2: Configure and Download Models
 
-### Main Models (Required)
+### Model Configuration
+
+YKGen uses configuration files to manage models and LoRAs:
+- **Model Config**: `ykgen/config/image_model_config.json` - Configure available models
+- **LoRA Config**: `ykgen/config/lora_config.json` - Configure available LoRA styles
+
+You can add your own models by editing these configuration files and placing the model files in the appropriate ComfyUI directories.
+
+### Suggested Model Downloads (Optional)
+
+The following are suggested models that work well with YKGen's default configuration:
 
 Create the checkpoints directory if it doesn't exist:
 ```bash
 mkdir -p models/checkpoints/
 ```
 
-#### Flux-Schnell Model (Ultra-fast generation)
+#### Flux-Schnell Model (Ultra-fast generation) - Optional
 
 **Download Options:**
 1. **Direct Download**: [Hugging Face - FLUX.1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell)
@@ -63,16 +77,26 @@ mkdir -p models/checkpoints/
    git lfs clone https://huggingface.co/black-forest-labs/FLUX.1-schnell
    ```
 
-**Required File:**
+**File:**
 - `flux1-schnell-fp8.safetensors`
 - **Size**: ~23GB
 - **Place in**: `models/checkpoints/`
 
-#### Illustrious-vPred Model (High-quality anime/manga style)
+#### WaiNSFW Illustrious Model (Default, NSFW-capable) - Suggested
+
+**Download from**: [CivitAI - WaiNSFW Illustrious](https://civitai.com/models/833294)
+
+**File:**
+- `waiNSFWIllustrious_v120.safetensors`
+- **Size**: ~6.6GB
+- **Place in**: `models/checkpoints/`
+- **Note**: This is the default model in YKGen's configuration
+
+#### Illustrious-vPred Model (High-quality anime/manga style) - Optional
 
 **Download from**: [CivitAI - NoobAI-XL](https://civitai.com/models/833294/noobai-xl-nai-xl)
 
-**Required File:**
+**File:**
 - `noobaiXLNAIXL_vPred10Version.safetensors`
 - **Size**: ~6.6GB
 - **Place in**: `models/checkpoints/`
@@ -93,16 +117,27 @@ mkdir -p models/clip/
 # CLIP models are usually included with main models
 ```
 
-## Step 3: Download LoRA Models (Optional but Recommended)
+## Step 3: Configure and Download LoRA Models (Optional)
 
-LoRA models enhance image generation with specific artistic styles.
+LoRA models enhance image generation with specific artistic styles. YKGen comes with pre-configured LoRAs in `ykgen/config/lora_config.json`.
 
 ### Setup LoRA Directory
 ```bash
 mkdir -p models/loras/
 ```
 
-### Recommended LoRA Sources
+### LoRA Configuration
+
+YKGen includes configurations for:
+- **Flux-Schnell LoRAs**: 8 professional styles (pixel art, anime, watercolor, etc.)
+- **Illustrious LoRAs**: 18+ character and style LoRAs for anime/manga
+- **WaiNSFW LoRAs**: NSFW-capable LoRAs for mature content
+
+You can add custom LoRAs by:
+1. Downloading LoRA files to `models/loras/`
+2. Adding configuration entries to `ykgen/config/lora_config.json`
+
+### LoRA Sources
 - [Hugging Face LoRA Collection](https://huggingface.co/models?other=lora)
 - [CivitAI LoRA Models](https://civitai.com/models?type=LORA)
 
@@ -220,16 +255,26 @@ After setup, your ComfyUI directory should look like:
 ComfyUI/
 ├── models/
 │   ├── checkpoints/
-│   │   ├── flux1-schnell-fp8.safetensors
-│   │   └── noobaiXLNAIXL_vPred10Version.safetensors
+│   │   ├── flux1-schnell-fp8.safetensors (optional)
+│   │   ├── waiNSFWIllustrious_v120.safetensors (suggested default)
+│   │   ├── noobaiXLNAIXL_vPred10Version.safetensors (optional)
+│   │   └── [your custom model files]
 │   ├── loras/
-│   │   └── [your LoRA files]
+│   │   └── [your LoRA files - see lora_config.json]
 │   ├── vae/
 │   └── clip/
 ├── main.py
 ├── requirements.txt
 └── [other ComfyUI files]
 ```
+
+## Model Configuration Files
+
+YKGen uses these configuration files to manage models and LoRAs:
+- `ykgen/config/image_model_config.json` - Configure available image generation models
+- `ykgen/config/lora_config.json` - Configure available LoRA styles and enhancements
+
+Edit these files to add your own models or modify existing configurations.
 
 ## Next Steps
 

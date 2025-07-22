@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .comfyui_image_base import ComfyUIImageClientBase
+from ..config.image_model_loader import get_image_model_config_path
 from ..console import print_success
 from .. import Scene
 
@@ -23,17 +24,17 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
         """Initialize the simple client with optional model configuration."""
         super().__init__(lora_config=lora_config)
         self.model_config = self._load_model_config(model_name)
-    
+
     def _load_model_config(self, model_name: Optional[str] = None) -> Dict[str, Any]:
         """Load model configuration from image_model_config.json."""
-        config_path = Path(__file__).parent.parent / "config" / "image_model_config.json"
-        
+        config_path = get_image_model_config_path()
+
         try:
             with open(config_path, 'r') as f:
                 config = json.load(f)
-            
+
             simple_models = config.get("simple", {}).get("models", [])
-            
+
             if model_name:
                 # Find specific model by name
                 for model in simple_models:
@@ -48,7 +49,7 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
                 # If no default, use first model
                 if simple_models:
                     return simple_models[0]
-                
+
             # Fallback to hardcoded values if config is missing
             return {
                 "name": "Flux Schnell",
@@ -72,7 +73,7 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
                 "denoise": 1,
                 "guidance": 3.5
             }
-    
+
     def get_lora_config_key(self) -> str:
         """Get the LoRA configuration key for this model."""
         return self.model_config.get("lora_config_key", "flux-schnell")
@@ -172,7 +173,7 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
         return "images4story"
 
     def create_prompt(
-        self, positive_prompt: str, negative_prompt: str = "", resolution: Optional[tuple[int, int]] = None
+            self, positive_prompt: str, negative_prompt: str = "", resolution: Optional[tuple[int, int]] = None
     ) -> Dict[str, Any]:
         """Create a simple model workflow prompt from text prompts with LoRA support."""
         prompt = copy.deepcopy(self.get_workflow_template())
@@ -180,13 +181,13 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
         # Set seed if provided in lora_config
         if self.lora_config and "seed" in self.lora_config:
             prompt["31"]["inputs"]["seed"] = self.lora_config["seed"]
-        
+
         # Handle LoRA configuration
         if not self.lora_config or self.lora_config.get("name") == "No LoRA" or self.lora_config.get("mode") == "none":
             # No LoRA: Remove LoRA loader and FluxGuidance, connect directly to checkpoint
             del prompt["38"]  # Remove LoRA loader
             del prompt["39"]  # Remove FluxGuidance
-            
+
             # Reconnect nodes to bypass LoRA
             prompt["6"]["inputs"]["clip"] = ["30", 1]  # Connect positive prompt to checkpoint
             prompt["33"]["inputs"]["clip"] = ["30", 1]  # Connect negative prompt to checkpoint
@@ -199,7 +200,7 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
             # Multiple LoRAs: Create a chain of LoRA loaders
             loras = self.lora_config.get("loras", [])
             active_loras = [lora for lora in loras if lora.get("file")]
-            
+
             if not active_loras:
                 # No active LoRAs, treat as no LoRA
                 del prompt["38"]
@@ -213,14 +214,14 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
                 # Remove the single LoRA loader and FluxGuidance
                 del prompt["38"]
                 del prompt["39"]
-                
+
                 # Create chain of LoRA loaders
                 last_model_output = ["30", 0]  # Start from checkpoint
                 last_clip_output = ["30", 1]
-                
+
                 for idx, lora in enumerate(active_loras):
                     lora_node_id = f"38_{idx}"  # 38_0, 38_1, 38_2, etc.
-                    
+
                     prompt[lora_node_id] = {
                         "inputs": {
                             "model": last_model_output,
@@ -232,17 +233,17 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
                         "class_type": "LoraLoader",
                         "_meta": {"title": f"Load LoRA {idx + 1}"},
                     }
-                    
+
                     # Update connections for next iteration
                     last_model_output = [lora_node_id, 0]
                     last_clip_output = [lora_node_id, 1]
-                
+
                 # Connect final outputs
                 prompt["6"]["inputs"]["clip"] = last_clip_output
                 prompt["33"]["inputs"]["clip"] = last_clip_output
                 prompt["31"]["inputs"]["model"] = last_model_output
                 prompt["31"]["inputs"]["positive"] = ["6", 0]
-                
+
                 # Add trigger words to positive prompt
                 trigger_words = self.lora_config.get("trigger", "")
                 if trigger_words:
@@ -254,7 +255,7 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
             prompt["38"]["inputs"]["lora_name"] = self.lora_config.get("file", "")
             prompt["38"]["inputs"]["strength_model"] = self.lora_config.get("strength_model", 1.0)
             prompt["38"]["inputs"]["strength_clip"] = self.lora_config.get("strength_clip", 1.0)
-            
+
             # Add trigger words to positive prompt
             trigger_words = self.lora_config.get("trigger", "")
             if trigger_words:
@@ -266,12 +267,12 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
         if self.lora_config and self.lora_config.get("recommended_settings"):
             recommended_settings = self.lora_config["recommended_settings"]
             ksampler_node = prompt["31"]["inputs"]
-            
+
             # Store original values for logging
             original_cfg = ksampler_node["cfg"]
             original_sampler = ksampler_node["sampler_name"]
             original_steps = ksampler_node["steps"]
-            
+
             # Apply recommended settings
             if "cfg" in recommended_settings:
                 ksampler_node["cfg"] = recommended_settings["cfg"]
@@ -279,11 +280,11 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
                 ksampler_node["sampler_name"] = recommended_settings["sampler"]
             if "steps" in recommended_settings:
                 ksampler_node["steps"] = recommended_settings["steps"]
-            
+
             # Log the changes
             applying_lora_name = self.lora_config.get("name", "Unknown LoRA")
             print_success(f"⚙️  Applied recommended settings from LoRA: {applying_lora_name}")
-            
+
             changes = []
             if "cfg" in recommended_settings and original_cfg != ksampler_node["cfg"]:
                 changes.append(f"CFG: {original_cfg} → {ksampler_node['cfg']}")
@@ -291,18 +292,18 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
                 changes.append(f"Sampler: {original_sampler} → {ksampler_node['sampler_name']}")
             if "steps" in recommended_settings and original_steps != ksampler_node["steps"]:
                 changes.append(f"Steps: {original_steps} → {ksampler_node['steps']}")
-            
+
             if changes:
                 print(f"     🔧 Settings changed: {', '.join(changes)}")
             else:
                 print(f"     ✅ No changes needed (settings already optimal)")
-            
+
             # Log ignored settings for multiple LoRAs
             if self.lora_config and self.lora_config.get("is_multiple"):
                 loras = self.lora_config.get("loras", [])
                 active_loras = [lora for lora in loras if lora.get("file")]
                 ignored_loras = [lora for lora in active_loras[1:] if "recommended_settings" in lora]
-                
+
                 if ignored_loras:
                     print(f"     ⚠️  Ignored settings from {len(ignored_loras)} additional LoRA(s):")
                     for i, lora in enumerate(ignored_loras, 2):
@@ -319,12 +320,13 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
             # Log default settings when no LoRA recommended_settings
             if self.lora_config and self.lora_config.get("name", "No LoRA") != "No LoRA":
                 print(f"     ⚙️  Using default settings (no recommended_settings in LoRA)")
-                print(f"     🔧 Default: CFG={prompt['31']['inputs']['cfg']}, Sampler={prompt['31']['inputs']['sampler_name']}, Steps={prompt['31']['inputs']['steps']}")
-        
+                print(
+                    f"     🔧 Default: CFG={prompt['31']['inputs']['cfg']}, Sampler={prompt['31']['inputs']['sampler_name']}, Steps={prompt['31']['inputs']['steps']}")
+
         # Set negative prompt with text exclusion
         if not negative_prompt:
             negative_prompt = "text, words, letters, writing, characters, typography, calligraphy, signs, symbols, numbers, chinese characters, japanese characters, korean characters, arabic text, latin text, cyrillic text, any written language"
-        
+
         prompt["33"]["inputs"]["text"] = negative_prompt
 
         # Randomize seed
@@ -336,7 +338,7 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
 
 
 def generate_images_for_scenes(
-    scenes: List[Scene], output_dir: Optional[str] = None, lora_config: Optional[Dict[str, Any]] = None
+        scenes: List[Scene], output_dir: Optional[str] = None, lora_config: Optional[Dict[str, Any]] = None
 ) -> List[str]:
     """
     Convenience function to generate images for scenes using default ComfyUI client.

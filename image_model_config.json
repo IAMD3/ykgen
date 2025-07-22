@@ -11,7 +11,7 @@
         "denoise": 1,
         "guidance": 3.5,
         "lora_config_key": "flux-schnell",
-        "default": true
+        "default": false
       },
       {
         "name": "Example New Model",
@@ -41,7 +41,7 @@
         "zsnr": true,
         "rescale_cfg_multiplier": 0.6,
         "lora_config_key": "illustrious-vpred",
-        "default": true
+        "default": false
       }
     ]
   }

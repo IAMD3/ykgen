@@ -20,7 +20,7 @@ from ykgen.lora.lora_loader import (
     get_lora_by_choice,
     prepare_lora_for_agent,
     prepare_multiple_loras_for_agent,
-    parse_strength_input
+    parse_strength_input, get_lora_config_path
 )
 
 
@@ -37,32 +37,36 @@ class LoRASelectionHandler:
         Get user LoRA selection with support for 'all', 'group', and 'none' modes.
         
         Args:
-            model_type: The model type being used.
+            model_type: The model type being used (can be model name or lora_config_key).
             lora_mode: The LoRA mode ('all', 'group', or 'none').
             
         Returns:
             Optional[Dict[str, Any]]: The LoRA configuration or None if selection fails.
         """
         try:
-            # Load available LoRA configurations
-            config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "ykgen", "config/lora_config.json")
-            
+            # Load available LoRA configurations in the project root
+            config_path = get_lora_config_path()
+
             with open(config_path, 'r') as f:
                 lora_configs = json.load(f)
             
-            if model_type not in lora_configs:
+            # Convert model name to lora_config_key if needed
+            from ykgen.lora.lora_loader import get_lora_key_for_model_type
+            lora_key = get_lora_key_for_model_type(model_type)
+            
+            if lora_key not in lora_configs:
                 from ykgen.console import print_error
-                print_error(f"Model type '{model_type}' not found in LoRA configuration")
+                print_error(f"LoRA configuration for model '{model_type}' (key: '{lora_key}') not found")
                 return None
             
-            available_loras = lora_configs[model_type]["loras"]
+            available_loras = lora_configs[lora_key]["loras"]
             
             if lora_mode == "all":
                 # Original behavior - select LoRAs that will be used for all images
-                return self._get_lora_selection_all_mode(available_loras, model_type)
+                return self._get_lora_selection_all_mode(available_loras, lora_key)
             elif lora_mode == "group":
                 # New behavior - select required and optional LoRAs
-                return self._get_lora_selection_group_mode(available_loras, model_type)
+                return self._get_lora_selection_group_mode(available_loras, lora_key)
             elif lora_mode == "none":
                 # No LoRA mode - return empty configuration
                 return {
@@ -78,7 +82,7 @@ class LoRASelectionHandler:
                 
         except Exception as e:
             from ykgen.console import print_error
-            print_error(f"Error loading LoRA configuration: {str(e)}", "Please check ykgen/lora_config.json")
+            print_error(f"Error loading LoRA configuration: {str(e)}", "Please check lora_config.json in project root")
             sys.exit(1)
 
     def _ensure_trigger(self, lora_config: Dict[str, Any]) -> Dict[str, Any]:

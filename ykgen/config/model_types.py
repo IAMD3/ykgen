@@ -1,105 +1,110 @@
-"""Model type enumerations for YKGen.
+"""Model type definitions and utilities for YKGen.
 
-This module defines the available model types and provides utilities
-for model type checking and workflow selection.
-"""
+This module provides dynamic model type definitions that load from
+image_model_config.json, replacing hardcoded enums for better configurability."""
 
-from enum import Enum
-from typing import Set
-
-
-class ModelType(Enum):
-    """Enumeration of available model types."""
-    
-    # Simple workflow models
-    FLUX_SCHNELL = "flux-schnell"
-    WAI_ILLUSTRIOUS = "wai-illustrious"
-    
-    # vPred workflow models
-    ILLUSTRIOUS_VPRED = "illustrious-vpred"
-
-
-class WorkflowType(Enum):
-    """Enumeration of workflow types."""
-    
-    SIMPLE = "simple"
-    VPRED = "vpred"
+from typing import Dict, Optional
+from .image_model_loader import (
+    is_vpred_model as _is_vpred_model,
+    is_simple_model as _is_simple_model,
+    get_workflow_type as _get_workflow_type,
+    get_model_display_name as _get_model_display_name,
+    get_all_model_names,
+    get_model_categories,
+    find_model_by_name,
+    get_model_category,
+    model_type as ModelType,
+    workflow_type as WorkflowType,
+)
 
 
-# Model type to workflow mapping
-MODEL_WORKFLOW_MAPPING = {
-    ModelType.FLUX_SCHNELL: WorkflowType.SIMPLE,
-    ModelType.WAI_ILLUSTRIOUS: WorkflowType.SIMPLE,  # Fixed: WaiNSFW should use simple workflow
-    ModelType.ILLUSTRIOUS_VPRED: WorkflowType.VPRED,
-}
-
-# Legacy string-based sets for backward compatibility
-VPRED_MODELS: Set[str] = {
-    ModelType.ILLUSTRIOUS_VPRED.value,
-}
-
-SIMPLE_MODELS: Set[str] = {
-    ModelType.FLUX_SCHNELL.value,
-    ModelType.WAI_ILLUSTRIOUS.value,
-}
-
-
-def is_vpred_model(model_type: str) -> bool:
-    """Check if a model type uses the vPred workflow.
+# Re-export functions for backward compatibility
+def is_vpred_model(model_name: str) -> bool:
+    """Check if a model uses vPred workflow.
     
     Args:
-        model_type: The model type string to check
+        model_name: The name of the model to check
         
     Returns:
-        bool: True if the model uses vPred workflow, False otherwise
+        True if the model uses vPred workflow, False otherwise
     """
-    return model_type in VPRED_MODELS
+    return _is_vpred_model(model_name)
 
 
-def is_simple_model(model_type: str) -> bool:
-    """Check if a model type uses the simple workflow.
+def is_simple_model(model_name: str) -> bool:
+    """Check if a model uses simple workflow.
     
     Args:
-        model_type: The model type string to check
+        model_name: The name of the model to check
         
     Returns:
-        bool: True if the model uses simple workflow, False otherwise
+        True if the model uses simple workflow, False otherwise
     """
-    return model_type in SIMPLE_MODELS
+    return _is_simple_model(model_name)
 
 
-def get_workflow_type(model_type: str) -> WorkflowType:
-    """Get the workflow type for a given model type.
+def get_workflow_type(model_name: str) -> str:
+    """Get the workflow type for a model.
     
     Args:
-        model_type: The model type string
+        model_name: The name of the model
         
     Returns:
-        WorkflowType: The workflow type for the model
-        
-    Raises:
-        ValueError: If the model type is not recognized
+        Workflow type string
     """
-    try:
-        model_enum = ModelType(model_type)
-        return MODEL_WORKFLOW_MAPPING[model_enum]
-    except ValueError:
-        raise ValueError(f"Unknown model type: {model_type}")
+    return _get_workflow_type(model_name)
 
 
-def get_model_display_name(model_type: str) -> str:
-    """Get a human-readable display name for a model type.
+def get_model_display_name(model_name: str) -> str:
+    """Get the display name for a model.
     
     Args:
-        model_type: The model type string
+        model_name: The name of the model
         
     Returns:
-        str: Human-readable model name
+        Display name for the model
     """
-    display_names = {
-        ModelType.FLUX_SCHNELL.value: "Flux-Schnell",
-        ModelType.WAI_ILLUSTRIOUS.value: "WaiNSFW Illustrious",
-        ModelType.ILLUSTRIOUS_VPRED.value: "Illustrious vPred",
-    }
+    return _get_model_display_name(model_name)
+
+
+# Additional utility functions
+def get_all_models() -> list[str]:
+    """Get all available model names.
     
-    return display_names.get(model_type, model_type)
+    Returns:
+        List of all model names
+    """
+    return get_all_model_names()
+
+
+def get_all_workflows() -> list[str]:
+    """Get all available workflow types.
+    
+    Returns:
+        List of all workflow categories
+    """
+    return get_model_categories()
+
+
+def model_exists(model_name: str) -> bool:
+    """Check if a model exists in the configuration.
+    
+    Args:
+        model_name: The name of the model to check
+        
+    Returns:
+        True if the model exists, False otherwise
+    """
+    return find_model_by_name(model_name) is not None
+
+
+def get_model_config(model_name: str) -> Optional[Dict]:
+    """Get the full configuration for a model.
+    
+    Args:
+        model_name: The name of the model
+        
+    Returns:
+        Model configuration dict if found, None otherwise
+    """
+    return find_model_by_name(model_name)
