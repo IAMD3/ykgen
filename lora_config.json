@@ -4,7 +4,7 @@
     "simple": "flux-schnell",
     "vpred": "illustrious-vpred"
   },
-   "flux-schnell": {
+  "flux-schnell": {
     "description": "Ultra-fast 4-step generation with multiple LoRA options",
     "loras": {
       "1": {
@@ -905,10 +905,28 @@
         "display_trigger": "a robot body",
         "strength_model": 0.9,
         "strength_clip": 0.9
+      },
+      "20": {
+        "name": "Ghibli style Illustrious ",
+        "description": "Ghibli style Illustrious",
+        "file": "Ghibli_MK2_style_illustV1.safetensors",
+        "trigger_words": {
+          "required": [
+            "Ghiblistyle"
+          ],
+          "optional": [
+            "source_anime",
+            "Ghiblistyle",
+            "anime coloring"
+          ]
+        },
+        "display_trigger": "a robot body",
+        "strength_model": 0.9,
+        "strength_clip": 0.9
       }
     }
-  }, 
-   "empty": {
+  },
+  "empty": {
     "description": "empty",
     "loras": {
     }
