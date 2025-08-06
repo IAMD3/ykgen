@@ -923,8 +923,113 @@
         "display_trigger": "a robot body",
         "strength_model": 0.9,
         "strength_clip": 0.9
-      }
+      }, "21": {
+      "name": "Spy x Family - Yor Forger / Yor Briar",
+      "description": "Spy x Family - Yor Forger / Yor Briar",
+      "file": "GYorForger-IL-v1-08.safetensors",
+      "trigger_words": {
+        "required": [
+          "<lora:YorForger-IL-v1-08:0.9>",
+          "ChopioYor",
+          "black hair", 
+          "red eyes", 
+          "gold earrings",
+          "looking at viewer",
+          "anime coloring"
+        ],
+        "optional": [
+            "short hair with long locks",
+            "sidelocks",
+            "white hairband",
+            "hair ribbon",
+            "long hair",
+            "straight hair",
+            "hair ornament",
+            "gold hairband",
+            "office lady",
+            "collared shirt",
+            "white shirt", 
+            "green vest",
+            "breast pocket",
+            "long sleeves",
+            "black buttons",
+            "green skirt",
+            "pencil skirt",
+            "flats",
+            "green footwear",
+            "bare shoulders",
+            "collarbone", 
+            "red sweater",
+            "sweater dress",
+            "sleeves past wrists",
+            "off-shoulder sweater",
+            "black leggings",
+            "high heel boots",
+            "ankle boots",
+            "brown footwear",
+            "back cutout",
+            "necklace",
+            "black dress",
+            "rose print",
+            "two-sided dress",
+            "black fingerless gloves",
+            "thigh boots",
+            "black footwear"
+        ]
+      },
+      "display_trigger": "Spy x Family - Yor Forger / Yor Briar",
+      "strength_model": 0.9,
+      "strength_clip": 0.9
+    },  "22": {
+      "name": "Anya Forger",
+      "description": "Spy x Family Anya Forger character style",
+      "file": "Spy_X_Family_-_Anya_Forger_-_illustrious.safetensors",
+      "trigger_words": {
+        "required": [
+          "Anya Forger"
+        ],
+        "optional": []
+      },
+      "display_trigger": "Anya Forger",
+      "strength_model": 1.0,
+      "strength_clip": 1.0
+    },  "23": {
+      "name": "Conan Edogawa",
+      "description": "Detective Conan character style",
+      "file": "Conan_Edogawa_-_Detective_Conan_-_Illustrious_Commission.safetensors",
+      "trigger_words": {
+        "required": [
+          "conan edogawa",
+          "brown hair",
+          "blue eyes",
+          "glasses"
+        ],
+        "optional": []
+      },
+      "display_trigger": "conan edogawa, brown hair, blue eyes, glasses",
+      "strength_model": 1.0,
+      "strength_clip": 1.0
+    },  "24": {
+      "name": "Haibara Ai",
+      "description": "Haibara Ai character style",
+      "file": "Haibara Ai IL V2.safetensors",
+      "trigger_words": {
+        "required": [
+          "haibara ai",
+          "short hair",
+          "brown hair", 
+          "blue eyes",
+          "hair between eyes",
+          "female child"
+        ],
+        "optional": []
+      },
+      "display_trigger": "haibara ai, short hair, brown hair, blue eyes, hair between eyes, female child",
+      "strength_model": 1.0,
+      "strength_clip": 1.0
     }
+  }
+  
   },
   "empty": {
     "description": "empty",
