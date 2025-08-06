@@ -392,3 +392,66 @@ Generate prompts maintaining character and environment consistency across all sc
             return {"scenes": updated_scenes}
 
         return self._retry_with_fallback("Prompt generation", try_generate, fallback)
+
+    def _build_lora_context_for_characters(self) -> str:
+        """Build LoRA context information for character generation.
+        
+        This method extracts relevant LoRA information (descriptions, trigger words, 
+        character types) to help the LLM generate characters that are optimized for 
+        the available LoRAs, improving visual consistency.
+        
+        Returns:
+            Formatted string containing LoRA context for character generation
+        """
+        if not self.lora_config:
+            return ""
+            
+        lora_context_parts = []
+        
+        # Handle different LoRA modes
+        if self.lora_config.get("mode") == "group":
+            # Group mode: extract info from required and optional LoRAs
+            lora_context_parts.append("Available LoRA Models for Character Styling:")
+            
+            # Required LoRAs (always used)
+            required_loras = self.lora_config.get("required_loras", [])
+            if required_loras:
+                lora_context_parts.append("\nRequired Style Models (always applied):")
+                for i, lora in enumerate(required_loras, 1):
+                    lora_info = f"  {i}. {lora['name']}: {lora.get('description', 'No description')}"
+                    if lora.get('trigger'):
+                        lora_info += f" (Key elements: {lora['trigger']})"
+                    lora_context_parts.append(lora_info)
+            
+            # Optional LoRAs (LLM can choose)
+            optional_loras = self.lora_config.get("optional_loras", [])
+            if optional_loras:
+                lora_context_parts.append("\nOptional Style Models (can be selected):")
+                for i, lora in enumerate(optional_loras, 1):
+                    lora_info = f"  {i}. {lora['name']}: {lora.get('description', 'No description')}"
+                    if lora.get('trigger'):
+                        lora_info += f" (Key elements: {lora['trigger']})"
+                    lora_context_parts.append(lora_info)
+                    
+        elif self.lora_config.get("selected_loras"):
+            # Multiple LoRA mode: show all selected LoRAs
+            lora_context_parts.append("Selected LoRA Models for Character Styling:")
+            for i, lora in enumerate(self.lora_config["selected_loras"], 1):
+                lora_info = f"  {i}. {lora['name']}: {lora.get('description', 'No description')}"
+                if lora.get('trigger'):
+                    lora_info += f" (Key elements: {lora['trigger']})"
+                lora_context_parts.append(lora_info)
+                
+        elif self.lora_config.get("name"):
+            # Single LoRA mode: show the active LoRA
+            lora_context_parts.append("Active LoRA Model for Character Styling:")
+            lora_info = f"  - {self.lora_config['name']}: {self.lora_config.get('description', 'No description')}"
+            if self.lora_config.get('trigger'):
+                lora_info += f" (Key elements: {self.lora_config['trigger']})"
+            lora_context_parts.append(lora_info)
+        
+        if lora_context_parts:
+            lora_context_parts.append("\nNote: Consider these LoRA characteristics when describing characters to ensure visual consistency.")
+            return "\n".join(lora_context_parts)
+        
+        return ""
