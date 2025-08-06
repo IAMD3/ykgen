@@ -138,16 +138,33 @@ Output ONLY the formatted pinyin, no explanations."""
         return self._retry_with_fallback("Story generation", try_generate, fallback)
 
     def generate_characters(self, state: VisionState) -> VisionState:
-        """Generate characters from the story."""
-        status_update("Extracting characters from story...", "bright_blue")
+        """Generate characters from the story with LoRA-aware character descriptions."""
+        status_update("Extracting characters from story with LoRA optimization...", "bright_blue")
 
+        # Build LoRA context for character generation
+        lora_context = self._build_lora_context_for_characters()
+        
         system_message = (
-            "You are a writer specializing in writing stories. "
-            "You will be provided with a story and your goal is to generate characters based on that story."
+            "You are a writer specializing in writing stories and character development. "
+            "You will be provided with a story and your goal is to generate characters based on that story. "
+            "When creating character descriptions, focus on visual details that will help with consistent image generation."
         )
 
         story_prompt = f"""Generate characters (maximum: {config.MAX_CHARACTERS}) based on the following story.
-        Story: {state['story_full'].content}"""
+        
+        Story: {state['story_full'].content}
+        
+        {lora_context}
+        
+        Requirements for character descriptions:
+        1. Include detailed physical appearance (hair color/style, eye color, facial features, body type)
+        2. Specify clothing style and distinctive accessories
+        3. Mention any unique visual characteristics or markings
+        4. Keep descriptions consistent with the story's setting and tone
+        5. If LoRA information is provided above, consider incorporating relevant style elements
+        6. Focus on visual details that will help maintain character consistency across multiple images
+        
+        Generate characters that are visually distinctive and well-suited for image generation."""
 
         prompt = ChatPromptTemplate.from_messages(
             [("system", system_message), ("user", story_prompt)]
@@ -347,6 +364,8 @@ Output ONLY the formatted pinyin, no explanations."""
             )
 
         return fallback_chars
+    
+
 
     def _create_fallback_scenes(self, story_content: str, characters: list, style: str) -> list:
         """Create basic fallback scenes when LLM fails (without image prompts)."""

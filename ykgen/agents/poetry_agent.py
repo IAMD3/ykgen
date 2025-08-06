@@ -157,12 +157,16 @@ Focus on visual elements that can be rendered as images."""
         return self._retry_with_fallback("Poetry story generation", try_generate, fallback)
 
     def generate_poetry_characters(self, state: VisionState) -> VisionState:
-        """Extract or create characters from the poetry interpretation."""
-        status_update("Identifying characters from poetry...", "bright_blue")
+        """Extract or create characters from the poetry interpretation with LoRA-aware character descriptions."""
+        status_update("Identifying characters from poetry with LoRA optimization...", "bright_blue")
 
+        # Build LoRA context for character generation
+        lora_context = self._build_lora_context_for_characters()
+        
         system_message = (
             "You are an expert in Chinese poetry analysis. "
-            "Identify or create characters based on the poetry and its visual story."
+            "Identify or create characters based on the poetry and its visual story. "
+            "When creating character descriptions, focus on visual details that will help with consistent image generation."
         )
 
         character_prompt = f"""Based on this poetry and its visual interpretation, identify or create characters:
@@ -173,13 +177,21 @@ Original Poetry:
 Visual Story:
 {state['story_full'].content}
 
+{lora_context}
+
 Generate characters (maximum: {config.MAX_CHARACTERS}) that represent:
 1. The poet or narrator (if implied)
 2. Any people mentioned in the poetry
 3. Personifications of natural elements if no humans are mentioned
 4. Characters that embody the poetry's emotions or themes
 
-Make the characters suitable for visual representation in a poetic, cartoon style."""
+Requirements for character descriptions:
+1. Include detailed physical appearance (hair color/style, eye color, facial features, body type)
+2. Specify clothing style and distinctive accessories
+3. Mention any unique visual characteristics or markings
+4. Keep descriptions consistent with the poetry's setting and tone
+5. If LoRA information is provided above, consider incorporating relevant style elements
+6. Make the characters suitable for visual representation in a poetic, cartoon style"""
 
         prompt = ChatPromptTemplate.from_messages(
             [("system", system_message), ("user", character_prompt)]
@@ -224,6 +236,8 @@ Make the characters suitable for visual representation in a poetic, cartoon styl
             )
 
         return self._retry_with_fallback("Poetry character generation", try_generate, fallback)
+
+
 
     def generate_poetry_scenes(self, state: VisionState) -> VisionState:
         """Generate visual scenes based on the poetry (without image prompts)."""
