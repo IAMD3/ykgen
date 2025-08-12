@@ -372,10 +372,11 @@ class ComfyUIVPredClient(ComfyUIImageClientBase):
             prompt["14"]["inputs"]["width"] = resolution[0]
             prompt["14"]["inputs"]["height"] = resolution[1]
 
-        # Randomize seed for KSampler
-        prompt["3"]["inputs"]["seed"] = int.from_bytes(
-            os.urandom(8), byteorder="big"
-        ) & ((1 << 63) - 1)
+        # Only randomize seed if not already set from lora_config
+        if not (self.lora_config and "seed" in self.lora_config):
+            prompt["3"]["inputs"]["seed"] = int.from_bytes(
+                os.urandom(8), byteorder="big"
+            ) & ((1 << 63) - 1)
 
         return prompt
 
