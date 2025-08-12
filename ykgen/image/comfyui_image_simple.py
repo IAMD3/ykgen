@@ -329,10 +329,11 @@ class ComfyUISimpleClient(ComfyUIImageClientBase):
 
         prompt["33"]["inputs"]["text"] = negative_prompt
 
-        # Randomize seed
-        prompt["31"]["inputs"]["seed"] = int.from_bytes(
-            os.urandom(8), byteorder="big"
-        ) & ((1 << 63) - 1)
+        # Only randomize seed if not already set from lora_config
+        if not (self.lora_config and "seed" in self.lora_config):
+            prompt["31"]["inputs"]["seed"] = int.from_bytes(
+                os.urandom(8), byteorder="big"
+            ) & ((1 << 63) - 1)
 
         return prompt
 

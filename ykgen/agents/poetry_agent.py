@@ -260,8 +260,10 @@ Requirements for character descriptions:
             "You are a visual artist specializing in creating scene descriptions from poetry and visual stories. "
             "You create scene breakdowns that capture the essence, mood, and imagery of poetry "
             "focusing on narrative elements rather than image generation prompts. "
-            "Focus on the poetic elements: location, time, characters, and actions."
-            "the scene is the stroyboard for small video, each scene should be around 5 seconds long"
+            "Focus on the poetic elements: location, time, characters, and actions. "
+            "Each scene is a storyboard for a 5-second video clip - design scenes with minimal, graceful movements "
+            "that can be beautifully captured in exactly 5 seconds. Think of gentle, contemplative actions "
+            "that flow smoothly and maintain the poetic atmosphere throughout the brief duration."
         )
 
         # Build the prompt based on whether style is provided
@@ -281,7 +283,14 @@ Create {config.MAX_SCENES} scenes focusing on:
 1. Location - Where the poetic scene takes place
 2. Time - The temporal setting or mood of the poetry
 3. Characters - Which characters or elements are present
-4. Action - What is happening or being contemplated
+4. Action - What is happening or being contemplated (keep actions simple and graceful for 5-second videos)
+
+IMPORTANT: Each scene will become a 5-second video clip. Design actions that:
+- Are gentle, slow, and contemplative
+- Can be beautifully captured in exactly 5 seconds
+- Flow smoothly without abrupt movements
+- Maintain poetic atmosphere throughout the brief duration
+- Focus on ONE main movement or moment per scene
 
 The scenes should capture the poetry's essence through narrative elements, maintaining consistency
 between scenes in terms of characters and the poetic environment described."""
@@ -300,7 +309,14 @@ Create {config.MAX_SCENES} scenes focusing on:
 1. Location - Where the poetic scene takes place
 2. Time - The temporal setting or mood of the poetry
 3. Characters - Which characters or elements are present
-4. Action - What is happening or being contemplated
+4. Action - What is happening or being contemplated (keep actions simple and graceful for 5-second videos)
+
+IMPORTANT: Each scene will become a 5-second video clip. Design actions that:
+- Are gentle, slow, and contemplative
+- Can be beautifully captured in exactly 5 seconds
+- Flow smoothly without abrupt movements
+- Maintain poetic atmosphere throughout the brief duration
+- Focus on ONE main movement or moment per scene
 
 The scenes should capture the poetry's essence through narrative elements, maintaining consistency
 between scenes in terms of characters and the poetic environment described."""
@@ -700,15 +716,22 @@ between scenes in terms of characters and the poetic environment described."""
                 f.write("-" * 40 + "\n")
                 f.write("1. Use the generated images as input for video generation tools\n")
                 f.write("2. Apply the video prompts below to each corresponding image\n")
-                f.write("3. Recommended video settings:\n")
-                f.write("   - Duration: 4-8 seconds per clip\n")
+                f.write("3. Recommended video settings for 5-second clips:\n")
+                f.write("   - Duration: EXACTLY 5 seconds per clip (optimal for poetry scenes)\n")
                 f.write("   - Resolution: 720P or higher\n")
                 f.write("   - Frame rate: 24-30 fps\n")
-                f.write("4. Suggested video generation tools:\n")
-                f.write("   - Runway ML Gen-3\n")
-                f.write("   - Pika Labs\n")
+                f.write("   - Motion: Subtle and smooth (avoid rapid movements)\n")
+                f.write("   - Transitions: Gentle fade-in/fade-out for seamless flow\n")
+                f.write("4. 5-Second Video Generation Guidelines:\n")
+                f.write("   - Focus on ONE main action or movement per clip\n")
+                f.write("   - Use slow, contemplative camera movements\n")
+                f.write("   - Emphasize atmospheric elements (lighting, weather, mood)\n")
+                f.write("   - Keep character movements minimal and graceful\n")
+                f.write("   - Perfect for creating a meditative, poetic flow\n")
+                f.write("5. Suggested video generation tools:\n")
+                f.write("   - Runway ML Gen-3 (excellent for 5-second clips)\n")
+                f.write("   - Pika Labs (good motion control)\n")
                 f.write("   - Stable Video Diffusion\n")
-
                 f.write("   - SiliconFlow (Wan2.1 I2V)\n\n")
                 
                 # Write original poetry
@@ -759,42 +782,63 @@ between scenes in terms of characters and the poetic environment described."""
                     f.write("\n")
                     
                     # Comprehensive video prompts
-                    f.write("VIDEO GENERATION PROMPTS:\n")
-                    f.write("-" * 30 + "\n")
+                    f.write("VIDEO GENERATION PROMPTS (5-SECOND CLIPS):\n")
+                    f.write("-" * 40 + "\n")
                     
-                    # Primary video prompt (optimized for movement and cinematography)
+                    # Primary video prompt (optimized for 5-second movement and cinematography)
                     video_prompt_parts = []
                     if scene.get('location'):
-                        video_prompt_parts.append(f"camera movement through {scene['location']}")
+                        video_prompt_parts.append(f"slow camera movement through {scene['location']}")
                     if scene.get('time'):
                         video_prompt_parts.append(f"atmospheric lighting for {scene['time']}")
                     if scene.get('action'):
-                        # Make action more video-friendly
+                        # Make action more video-friendly for 5-second clips
                         action = scene['action']
-                        video_prompt_parts.append(f"smooth motion: {action}")
+                        video_prompt_parts.append(f"gentle motion: {action}")
                     
-                    # Add cinematic elements with poetry-specific aesthetics
+                    # Add cinematic elements optimized for 5-second poetry clips
                     video_prompt_parts.extend([
-                        "cinematic camera movement",
+                        "5-second duration",
+                        "slow cinematic camera movement",
                         "professional film quality",
-                        "smooth transitions",
-                        "dynamic composition",
-                        "depth of field effects",
-                        "natural lighting progression",
-                        "poetic atmosphere",
+                        "smooth gentle transitions",
+                        "contemplative composition",
+                        "soft depth of field effects",
+                        "gradual lighting progression",
+                        "meditative poetic atmosphere",
                         "classical chinese aesthetics",
-                        "elegant camera work"
+                        "elegant minimal camera work",
+                        "subtle motion blur",
+                        "peaceful rhythm"
                     ])
                     
                     primary_prompt = ", ".join(video_prompt_parts)
-                    f.write(f"Primary Prompt: {primary_prompt}\n\n")
+                    f.write(f"Primary 5-Second Prompt: {primary_prompt}\n\n")
                     
-                    # Alternative prompts for different styles
-                    f.write("Alternative Prompts:\n")
-                    f.write("1. Slow, meditative camera movement with classical Chinese music\n")
-                    f.write("2. Gentle panning shot with soft, natural lighting\n")
-                    f.write("3. Poetic zoom effect with atmospheric fog or mist\n")
-                    f.write("4. Elegant tracking shot with traditional Chinese elements\n\n")
+                    # Add specific 5-second timing guidance
+                    f.write("5-SECOND TIMING BREAKDOWN:\n")
+                    f.write("-" * 30 + "\n")
+                    f.write("• 0-1s: Gentle fade-in, establish scene atmosphere\n")
+                    f.write("• 1-3s: Main action/movement (slow and graceful)\n")
+                    f.write("• 3-4s: Hold the moment, emphasize mood\n")
+                    f.write("• 4-5s: Subtle fade-out or transition preparation\n\n")
+                    
+                    # Alternative prompts for different 5-second styles
+                    f.write("Alternative 5-Second Prompts:\n")
+                    f.write("1. Slow, meditative camera movement (5s): gentle drift through scene with classical Chinese music\n")
+                    f.write("2. Gentle panning shot (5s): smooth horizontal pan with soft, natural lighting progression\n")
+                    f.write("3. Poetic zoom effect (5s): subtle zoom-in/out with atmospheric fog or mist, perfect timing\n")
+                    f.write("4. Elegant tracking shot (5s): graceful camera follow with traditional Chinese elements\n")
+                    f.write("5. Static hold with atmosphere (5s): minimal movement, focus on mood and lighting changes\n")
+                    f.write("6. Breathing motion (5s): subtle in-and-out movement like natural breathing rhythm\n\n")
+                    
+                    # Add motion intensity guide for 5-second clips
+                    f.write("MOTION INTENSITY GUIDE FOR 5-SECOND CLIPS:\n")
+                    f.write("-" * 45 + "\n")
+                    f.write("• MINIMAL: Barely perceptible movement (perfect for contemplative scenes)\n")
+                    f.write("• SUBTLE: Gentle, slow motion (ideal for most poetry scenes)\n")
+                    f.write("• MODERATE: Noticeable but controlled movement (use sparingly)\n")
+                    f.write("• AVOID: Fast or dramatic movements (breaks poetic flow)\n\n")
                     
                     # Audio suggestions
                     f.write("AUDIO SUGGESTIONS:\n")

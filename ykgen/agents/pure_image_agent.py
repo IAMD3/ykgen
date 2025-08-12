@@ -187,13 +187,21 @@ Output ONLY the formatted pinyin, no explanations."""
             if not isinstance(characters, list):
                 raise ValueError("Characters is not a list")
 
+            # Generate consistent seeds for all characters
+            for character in characters:
+                name = character.get('name', 'Unknown')
+                description = character.get('description', '')
+                character_seed = self._generate_character_seed(name, description)
+                character['seed'] = character_seed
+                print_success(f"Character '{name}' assigned seed: {character_seed}")
+
             result = VisionState(
                 prompt=state["prompt"],
                 story_full=state["story_full"],
                 characters_full=characters,
             )
             print_success(
-                f"Character extraction completed - {len(characters)} characters generated"
+                f"Character extraction completed - {len(characters)} characters generated with persistent seeds"
             )
             return result
 
@@ -201,6 +209,14 @@ Output ONLY the formatted pinyin, no explanations."""
             fallback_characters = self._create_fallback_characters(
                 state["story_full"].content
             )
+            # Generate seeds for fallback characters too
+            for character in fallback_characters:
+                name = character.get('name', 'Unknown')
+                description = character.get('description', '')
+                character_seed = self._generate_character_seed(name, description)
+                character['seed'] = character_seed
+                print_success(f"Fallback character '{name}' assigned seed: {character_seed}")
+            
             return VisionState(
                 prompt=state["prompt"],
                 story_full=state["story_full"],
@@ -611,14 +627,25 @@ Return the prompts using the ScenePrompts tool."""
 
             all_image_paths = []
             
+            # Generate master character seeds for consistent character appearance
+            character_seeds = self._generate_master_character_seeds(state.get('characters_full', []))
+            if character_seeds:
+                print_success(f"Generated master character seeds: {character_seeds}")
+            
             # Generate multiple images for each scene
             for scene_index, scene in enumerate(state["scenes"]):
                 scene_image_paths = []
                 
-                # Generate a random seed for this scene (to be used for all images in this scene)
-                import random
-                scene_seed = random.randint(1, 2147483647)
-                print_success(f"Using seed {scene_seed} for all images in scene {scene_index + 1}")
+                # Use character-specific seed for this scene (prioritizes character consistency)
+                scene_seed = self._get_scene_character_seed(scene, character_seeds)
+                
+                # Log which character's seed is being used
+                scene_characters = scene.get('characters', [])
+                if scene_characters:
+                    primary_character = scene_characters[0].get('name', 'Unknown')
+                    print_success(f"Scene {scene_index + 1}: Using character '{primary_character}' seed {scene_seed}")
+                else:
+                    print_success(f"Scene {scene_index + 1}: Using scene-specific seed {scene_seed}")
                 
                 # Generate multiple prompts for this scene if images_per_scene > 1
                 if self.images_per_scene > 1:

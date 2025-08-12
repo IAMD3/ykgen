@@ -6,6 +6,7 @@ This module provides the base agent class that all specific agents should inheri
 
 from abc import ABC, abstractmethod
 from typing import Optional
+import hashlib
 
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph
@@ -392,6 +393,81 @@ Generate prompts maintaining character and environment consistency across all sc
             return {"scenes": updated_scenes}
 
         return self._retry_with_fallback("Prompt generation", try_generate, fallback)
+
+    def _generate_character_seed(self, character_name: str, character_description: str) -> int:
+        """
+        Generate a consistent seed for a character based on their name and description.
+        
+        This ensures the same character will always get the same seed across different
+        scenes, improving visual consistency.
+        
+        Args:
+            character_name: The character's name
+            character_description: The character's physical description
+            
+        Returns:
+            A consistent integer seed for the character (1 to 2147483647)
+        """
+        # Create a unique string combining name and key physical features
+        character_key = f"{character_name.lower()}_{character_description.lower()}"
+        
+        # Generate a hash and convert to seed range
+        hash_object = hashlib.md5(character_key.encode())
+        hash_hex = hash_object.hexdigest()
+        
+        # Convert first 8 characters of hex to integer and ensure it's in valid range
+        seed = int(hash_hex[:8], 16) % 2147483647 + 1
+        
+        return seed
+    
+    def _generate_master_character_seeds(self, characters: list) -> dict:
+        """
+        Generate master seeds for all characters in the story.
+        
+        Args:
+            characters: List of character dictionaries with 'name' and 'description'
+            
+        Returns:
+            Dictionary mapping character names to their consistent seeds
+        """
+        character_seeds = {}
+        
+        for character in characters:
+            name = character.get('name', 'Unknown')
+            description = character.get('description', '')
+            
+            seed = self._generate_character_seed(name, description)
+            character_seeds[name] = seed
+            
+        return character_seeds
+    
+    def _get_scene_character_seed(self, scene: dict, character_seeds: dict) -> int:
+        """
+        Get the primary character seed for a scene.
+        
+        If multiple characters are in the scene, uses the first character's seed.
+        If no characters are found, generates a scene-specific seed.
+        
+        Args:
+            scene: Scene dictionary containing character information
+            character_seeds: Dictionary mapping character names to seeds
+            
+        Returns:
+            Integer seed for the scene based on primary character
+        """
+        scene_characters = scene.get('characters', [])
+        
+        if scene_characters:
+            # Use the first character's seed as the primary seed
+            primary_character = scene_characters[0].get('name', 'Unknown')
+            if primary_character in character_seeds:
+                return character_seeds[primary_character]
+        
+        # Fallback: generate seed based on scene content
+        scene_key = f"{scene.get('location', '')}_{scene.get('action', '')}"
+        hash_object = hashlib.md5(scene_key.encode())
+        hash_hex = hash_object.hexdigest()
+        return int(hash_hex[:8], 16) % 2147483647 + 1
 
     def _build_lora_context_for_characters(self) -> str:
         """Build LoRA context information for character generation.
