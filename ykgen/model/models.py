@@ -17,6 +17,7 @@ class Character(TypedDict):
     description: Annotated[
         str, "the description of the character, with appearance and characteristics"
     ]
+    seed: Annotated[Optional[int], "consistent seed for character image generation across scenes"]
 
 
 class Characters(TypedDict):
