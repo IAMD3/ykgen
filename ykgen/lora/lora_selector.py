@@ -343,14 +343,15 @@ Select the LoRA names exactly as they appear in the list above.
     def combine_loras_for_generation(
         self,
         required_loras: List[Dict[str, Any]],
-        selected_optional_loras: List[Dict[str, Any]]
+        selected_optional_loras: List[Dict[str, Any]],
+        preserve_config: Dict[str, Any] = None
     ) -> Dict[str, Any]:
-        """
-        Combine required and selected optional LoRAs for image generation.
+        """        Combine required and selected optional LoRAs for image generation.
         
         Args:
             required_loras: List of required LoRAs
             selected_optional_loras: List of selected optional LoRAs
+            preserve_config: Optional config to preserve additional settings (like seed)
             
         Returns:
             Combined LoRA configuration for image generation
@@ -370,7 +371,7 @@ Select the LoRA names exactly as they appear in the list above.
         if len(all_loras) == 1:
             # Single LoRA
             lora = all_loras[0]
-            return {
+            config = {
                 "name": lora["name"],
                 "file": lora["file"],
                 "trigger": lora.get("trigger", ""),
@@ -380,6 +381,12 @@ Select the LoRA names exactly as they appear in the list above.
                 "essential_traits": lora.get("essential_traits", []),
                 "is_multiple": False
             }
+            # Preserve additional config like seed
+            if preserve_config:
+                for key, value in preserve_config.items():
+                    if key not in config:  # Don't override LoRA-specific settings
+                        config[key] = value
+            return config
         else:
             # Multiple LoRAs
             prepared_loras = []
@@ -395,12 +402,18 @@ Select the LoRA names exactly as they appear in the list above.
                 }
                 prepared_loras.append(prepared_lora)
             
-            return {
+            config = {
                 "is_multiple": True,
                 "loras": prepared_loras,
                 "trigger": ", ".join(all_triggers),
                 "name": f"Combined LoRAs ({len(prepared_loras)} total)"
             }
+            # Preserve additional config like seed
+            if preserve_config:
+                for key, value in preserve_config.items():
+                    if key not in config:  # Don't override LoRA-specific settings
+                        config[key] = value
+            return config
 
 
 def select_loras_for_all_scenes_optimized(
@@ -448,7 +461,8 @@ def select_loras_for_all_scenes_optimized(
     # Combine required and selected optional LoRAs
     combined_config = selector.combine_loras_for_generation(
         required_loras=required_loras,
-        selected_optional_loras=selection_result["selected_loras"]
+        selected_optional_loras=selection_result["selected_loras"],
+        preserve_config=group_config  # Preserve seed and other config from original group_config
     )
     
     # Add selection metadata
