@@ -188,6 +188,7 @@ class VideoAgent(BaseAgent):
             "is to generate scene descriptions that capture the key moments and actions of the story. "
             "Focus on the narrative elements: location, time, characters present, and the action taking place. "
             "Do not generate image prompts - only describe the scenes in terms of story elements."
+            "the scene is the stroyboard for small video, each scene should be around 5 seconds long"
         )
 
         # Build the prompt based on whether style is provided

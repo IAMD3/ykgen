@@ -261,6 +261,7 @@ Requirements for character descriptions:
             "You create scene breakdowns that capture the essence, mood, and imagery of poetry "
             "focusing on narrative elements rather than image generation prompts. "
             "Focus on the poetic elements: location, time, characters, and actions."
+            "the scene is the stroyboard for small video, each scene should be around 5 seconds long"
         )
 
         # Build the prompt based on whether style is provided
