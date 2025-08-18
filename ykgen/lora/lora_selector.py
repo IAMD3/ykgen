@@ -470,6 +470,11 @@ def select_loras_for_all_scenes_optimized(
         combined_config["selection_reasoning"] = selection_result["reasoning"]
         combined_config["total_scenes"] = selection_result["total_scenes"]
         combined_config["optimized_selection"] = True
+        
+        # IMPORTANT: Preserve seed from original group_config to maintain seed consistency
+        # This ensures that character-specific seeds are maintained across all images in group mode
+        if "seed" in group_config:
+            combined_config["seed"] = group_config["seed"]
     
     print_success(f"✅ Optimized LoRA selection completed for {len(scenes)} scenes (single LLM call)")
     return combined_config
