@@ -603,9 +603,11 @@ Only extract features that are explicitly mentioned. If a feature is not describ
         return scenes
 
     def _generate_multiple_prompts_for_scene(self, scene: Dict[str, Any]) -> List[str]:
-        """Generate multiple image prompts for a single scene using LLM.
+        """Generate multiple image prompts for a single scene with guaranteed character consistency.
         
-        This ensures character descriptions remain consistent while varying other prompt elements.
+        This method preserves exact character descriptions from the original prompt while varying
+        only non-character elements like camera angles, lighting, and composition.
+        
         Args:
             scene: The scene to generate prompts for
             
@@ -620,147 +622,126 @@ Only extract features that are explicitly mentioned. If a feature is not describ
             "bright_yellow",
         )
         
-        # Extract character descriptions using bound character descriptions for consistency
-        character_descriptions = []
-        bound_character_details = []
+        # Extract the original prompt and identify character descriptions
+        original_prompt = scene["image_prompt_positive"]
         
-        for character in scene.get("characters", []):
-            character_name = character.get("name", "")
-            if character_name:
-                # Use bound character description for enhanced consistency
-                bound_description = self._get_bound_character_description(character_name)
-                character_descriptions.append(f"{character_name}: {bound_description}")
-                
-                # Also extract visual features for detailed consistency
+        # Extract exact character descriptions from the original prompt to preserve them
+        preserved_character_parts = []
+        non_character_parts = []
+        
+        # Split the original prompt into parts
+        prompt_parts = [part.strip() for part in original_prompt.split(',')]
+        
+        # Identify character-related parts by checking against bound character descriptions
+        for part in prompt_parts:
+            is_character_part = False
+            
+            # Check if this part contains character descriptions
+            for character in scene.get("characters", []):
+                character_name = character.get("name", "")
+                if character_name and character_name.lower() in part.lower():
+                    # This part mentions a character, preserve it exactly
+                    preserved_character_parts.append(part)
+                    is_character_part = True
+                    break
+                    
+                # Also check for character visual features
                 if character_name in self.character_bindings:
                     features = self.character_bindings[character_name]['visual_features']
-                    feature_parts = []
-                    for feature_type, feature_desc in features.items():
-                        if feature_desc:
-                            feature_parts.append(feature_desc)
-                    if feature_parts:
-                        bound_character_details.append(f"{character_name} visual features: {', '.join(feature_parts)}")
-        
-        character_desc_text = "; ".join(character_descriptions) if character_descriptions else ""
-        character_features_text = "; ".join(bound_character_details) if bound_character_details else ""
-        
-        # Define a structured model for the prompts
-        from langchain_core.tools import tool
-        
-        @tool
-        def ScenePrompts(prompts: List[str]) -> List[str]:
-            """Generate multiple prompts for a scene.
+                    for feature_desc in features.values():
+                        if feature_desc and any(keyword in part.lower() for keyword in feature_desc.lower().split()):
+                            preserved_character_parts.append(part)
+                            is_character_part = True
+                            break
+                    if is_character_part:
+                        break
             
-            Args:
-                prompts: List of prompts for the scene
-                
-            Returns:
-                The same list of prompts
-            """
-            return prompts
+            if not is_character_part:
+                non_character_parts.append(part)
         
-        system_message = (
-            "You are an expert in creating image generation prompts. "
-            "Your task is to create multiple variations of a prompt while keeping character descriptions consistent. use tool call if available"
-        )
-
-        # Build LoRA context
-        lora_context = ""
+        # If we couldn't identify character parts properly, fall back to bound descriptions
+        if not preserved_character_parts:
+            for character in scene.get("characters", []):
+                character_name = character.get("name", "")
+                if character_name:
+                    bound_description = self._get_bound_character_description(character_name)
+                    preserved_character_parts.append(f"{character_name}, {bound_description}")
+        
+        # Create variations by modifying only non-character elements
+        variations = []
+        
+        # Preserve exact character descriptions
+        character_part = ", ".join(preserved_character_parts)
+        
+        # Define variation modifiers for non-character elements
+        scene_modifiers = [
+            # Base version (original)
+            [],
+            # Camera and composition variations
+            ["close-up shot", "detailed focus"],
+            ["wide angle view", "panoramic composition"],
+            ["medium shot", "balanced framing"],
+            ["low angle view", "dramatic perspective"],
+            ["high angle view", "bird's eye perspective"],
+            # Lighting variations
+            ["soft lighting", "gentle illumination"],
+            ["dramatic lighting", "strong contrast"],
+            ["golden hour lighting", "warm atmosphere"],
+            ["cinematic lighting", "professional photography"],
+        ]
+        
+        # Build LoRA trigger words
+        lora_triggers = []
         if self.lora_config:
             if self.lora_config.get("mode") == "group":
                 trigger_words = self.lora_config.get("required_trigger", "")
                 if trigger_words:
-                    lora_context = f"IMPORTANT: You MUST include these essential trigger words in EVERY positive prompt: '{trigger_words}'. These are required for the required LoRA models to work properly."
+                    lora_triggers.extend([t.strip() for t in trigger_words.split(",")])
             else:
                 trigger_words = self.lora_config.get("trigger", "")
                 if trigger_words and self.lora_config.get("name", "No LoRA") != "No LoRA":
-                    lora_context = f"IMPORTANT: You MUST include these essential trigger words in EVERY positive prompt: '{trigger_words}'. These are required for the LoRA model '{self.lora_config['name']}' to work properly."
-
-        prompt_template = f"""Generate {self.images_per_scene} different image generation prompts for the same scene, if there are two or more  images per scene, make sure the first image and the last image of each scene can be combined into the opening and ending frames .
-
-Scene details:
-- Location: {scene.get('location', 'Unknown location')}
-- Time: {scene.get('time', 'Unknown time')}
-- Action: {scene.get('action', 'Unknown action')}
-- Characters: {', '.join([c.get('name', 'Unknown') for c in scene.get('characters', [])])}
-
-Original prompt:
-{scene["image_prompt_positive"]}
-
-BOUND CHARACTER DESCRIPTIONS (MUST preserve EXACTLY in ALL prompts):
-{character_desc_text}
-
-CHARACTER VISUAL FEATURES (for enhanced consistency):
-{character_features_text}
-
-LoRA Context: {lora_context}
-
-Requirements:
-1. Create {self.images_per_scene} distinct prompts that describe the same scene but with different perspectives, angles, or focus
-2. Each prompt should be 50-100 words long
-3. Keep ALL bound character descriptions EXACTLY the same in each prompt - do not modify any character features
-4. Use the provided character visual features to ensure complete consistency of appearance
-5. Vary ONLY non-character elements like camera angle, lighting, focus, composition, background details, or scene atmosphere
-6. Maintain the same overall scene and setting
-7. Each prompt should be suitable for high-quality image generation
-8. Format each prompt as a comma-separated list of descriptors
-
-CRITICAL: Character consistency is the highest priority. The bound character descriptions contain the exact visual details that must be preserved. Do not change hair color, eye color, clothing, or any other character features. Only vary scene elements like lighting, camera angles, and background details.
-
-Return the prompts using the ScenePrompts tool."""
-
-        prompt = ChatPromptTemplate.from_messages(
-            [("system", system_message), ("user", prompt_template)]
-        )
-
-        def try_generate():
-            model_with_tools = get_llm().bind_tools([ScenePrompts])
-            chain = prompt | model_with_tools
-            output = chain.invoke({})
+                    lora_triggers.extend([t.strip() for t in trigger_words.split(",")])
+        
+        # Generate the required number of variations
+        for i in range(self.images_per_scene):
+            prompt_parts = []
             
-            if not hasattr(output, "tool_calls") or not output.tool_calls:
-                raise ValueError("No tool calls found in output")
+            # Add LoRA triggers first
+            if lora_triggers:
+                prompt_parts.extend(lora_triggers)
             
-            if len(output.tool_calls) == 0:
-                raise ValueError("Empty tool calls list")
+            # Add preserved character descriptions (exact)
+            if character_part:
+                prompt_parts.append(character_part)
             
-            prompts = output.tool_calls[0]["args"]["prompts"]
+            # Add scene-specific non-character parts
+            prompt_parts.extend(non_character_parts)
             
-            if not prompts or len(prompts) == 0:
-                raise ValueError("Empty prompts generated")
+            # Add variation modifiers (cycling through available modifiers)
+            if i < len(scene_modifiers):
+                prompt_parts.extend(scene_modifiers[i])
+            else:
+                # If we need more variations than modifiers, combine them
+                modifier_index = i % len(scene_modifiers)
+                prompt_parts.extend(scene_modifiers[modifier_index])
+                # Add a unique element to ensure variation
+                extra_modifiers = ["artistic composition", "enhanced details", "refined quality", "improved clarity"]
+                prompt_parts.append(extra_modifiers[i % len(extra_modifiers)])
             
-            # Ensure we have the right number of prompts
-            if len(prompts) < self.images_per_scene:
-                # If we don't have enough, duplicate the last one
-                prompts.extend([prompts[-1]] * (self.images_per_scene - len(prompts)))
-            elif len(prompts) > self.images_per_scene:
-                # If we have too many, truncate
-                prompts = prompts[:self.images_per_scene]
-            
-            print_success(f"Generated {len(prompts)} prompt variations for the scene")
-            return prompts
+            # Combine all parts into a single prompt
+            variation_prompt = ", ".join([part for part in prompt_parts if part.strip()])
+            variations.append(variation_prompt)
+        
+        print_success(f"Generated {len(variations)} prompt variations with preserved character consistency")
+        
+        # Log the variations for debugging
+        for i, variation in enumerate(variations, 1):
+            print(f"Variation {i}: {variation[:100]}..." if len(variation) > 100 else f"Variation {i}: {variation}")
+        
+        return variations
 
-        def fallback():
-            # Create basic variations by adding slight modifications
-            base_prompt = scene["image_prompt_positive"]
-            variations = [base_prompt]
-            
-            modifiers = [
-                ", different angle", 
-                ", different lighting", 
-                ", different perspective", 
-                ", different composition",
-                ", different focus"
-            ]
-            
-            for i in range(1, self.images_per_scene):
-                idx = i % len(modifiers)
-                variations.append(f"{base_prompt}{modifiers[idx]}")
-            
-            print_warning(f"Using fallback prompt variations for the scene")
-            return variations
-
-        return self._retry_with_fallback("Multiple prompt generation", try_generate, fallback)
+        # Return the generated variations (no LLM needed, guaranteed consistency)
+        return variations
 
     def generate_multiple_images(self, state: VisionState) -> VisionState:
         """Generate multiple images per scene using ComfyUI and selected model with adaptive LoRA mode."""
