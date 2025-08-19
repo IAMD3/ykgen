@@ -61,7 +61,7 @@
         "zsnr": true,
         "rescale_cfg_multiplier": 0.6,
         "lora_config_key": "illustrious-vpred",
-        "default": false
+        "default": true
       }
     ]
   }
