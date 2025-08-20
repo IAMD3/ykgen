@@ -830,9 +830,10 @@ Only extract features that are explicitly mentioned. If a feature is not describ
                         "bright_blue",
                     )
                     
-                    # Create a modified scene with the current prompt
+                    # Create a modified scene with the current prompt and seed
                     scene_copy = scene.copy()
                     scene_copy["image_prompt_positive"] = prompt
+                    scene_copy["seed"] = scene_seed  # Add seed to scene data
                     
                     # Create a single-scene list for the adaptive generation function
                     single_scene = [scene_copy]
