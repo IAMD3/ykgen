@@ -211,13 +211,21 @@ Requirements for character descriptions:
             if not isinstance(characters, list):
                 raise ValueError("Characters is not a list")
 
+            # Generate consistent seeds for all characters
+            for character in characters:
+                name = character.get('name', 'Unknown')
+                description = character.get('description', '')
+                character_seed = self._generate_character_seed(name, description)
+                character['seed'] = character_seed
+                print_success(f"Character '{name}' assigned seed: {character_seed}")
+
             result = VisionState(
                 prompt=state["prompt"],
                 story_full=state["story_full"],
                 characters_full=characters,
                 pinyin_lyrics=state.get("pinyin_lyrics", "")
             )
-            print_success(f"Character extraction completed - {len(characters)} characters identified")
+            print_success(f"Character extraction completed - {len(characters)} characters identified with persistent seeds")
             return result
 
         def fallback():
@@ -228,6 +236,14 @@ Requirements for character descriptions:
                     "description": "A contemplative figure observing the scene described in the poetry, dressed in traditional Chinese robes"
                 }
             ]
+            # Generate seeds for fallback characters too
+            for character in fallback_characters:
+                name = character.get('name', 'Unknown')
+                description = character.get('description', '')
+                character_seed = self._generate_character_seed(name, description)
+                character['seed'] = character_seed
+                print_success(f"Fallback character '{name}' assigned seed: {character_seed}")
+            
             return VisionState(
                 prompt=state["prompt"],
                 story_full=state["story_full"],
@@ -484,12 +500,42 @@ between scenes in terms of characters and the poetic environment described."""
             )
 
         try:
+            # Generate master character seeds for consistent character appearance
+            character_seeds = self._generate_master_character_seeds(state.get('characters_full', []))
+            if character_seeds:
+                print_success(f"Generated master character seeds: {character_seeds}")
+            
+            # Add character seeds to lora_config for each scene
+            scenes_with_seeds = []
+            for scene_index, scene in enumerate(state["scenes"]):
+                # Use character-specific seed for this scene
+                scene_seed = self._get_scene_character_seed(scene, character_seeds)
+                
+                # Log which character's seed is being used
+                scene_characters = scene.get('characters', [])
+                if scene_characters:
+                    primary_character = scene_characters[0].get('name', 'Unknown')
+                    if len(scene_characters) == 1:
+                        print_success(f"Scene {scene_index + 1}: Single character '{primary_character}' - using character's seed {scene_seed}")
+                    else:
+                        print_success(f"Scene {scene_index + 1}: Multiple characters - using primary character '{primary_character}' seed {scene_seed}")
+                else:
+                    print_success(f"Scene {scene_index + 1}: No characters - using scene-specific seed {scene_seed}")
+                
+                # Create scene copy with seed information
+                scene_with_seed = scene.copy()
+                scene_with_seed['seed'] = scene_seed
+                scenes_with_seeds.append(scene_with_seed)
+            
             # Use the optimized adaptive image generation function
             from ..image.group_mode_image_generator import generate_images_for_scenes_adaptive_optimized
             
+            # Add seed to lora_config
+            lora_config_with_seeds = self.lora_config.copy() if self.lora_config else {}
+            
             image_paths = generate_images_for_scenes_adaptive_optimized(
-                scenes=state["scenes"],
-                lora_config=self.lora_config,
+                scenes=scenes_with_seeds,
+                lora_config=lora_config_with_seeds,
                 model_name=model_name
             )
                 

@@ -464,6 +464,7 @@ Generate prompts maintaining character and environment consistency across all sc
         """
         Get the primary character seed for a scene.
         
+        If there is only one character in the scene, uses that character's seed.
         If multiple characters are in the scene, uses the first character's seed.
         If no characters are found, generates a scene-specific seed.
         
@@ -477,7 +478,8 @@ Generate prompts maintaining character and environment consistency across all sc
         scene_characters = scene.get('characters', [])
         
         if scene_characters:
-            # Use the first character's seed as the primary seed
+            # For single character scenes, ensure we use that character's seed
+            # For multiple character scenes, use the first character's seed as primary
             primary_character = scene_characters[0].get('name', 'Unknown')
             if primary_character in character_seeds:
                 return character_seeds[primary_character]

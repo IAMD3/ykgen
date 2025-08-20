@@ -223,13 +223,19 @@ class ComfyUIImageClientBase(ABC):
                             resolution=resolution
                         )
                         
-                        # Apply seed if provided in lora_config
-                        if self.lora_config and "seed" in self.lora_config:
+                        # Apply seed if provided in scene data or lora_config
+                        seed_to_use = None
+                        if "seed" in scene:
+                            seed_to_use = scene["seed"]
+                        elif self.lora_config and "seed" in self.lora_config:
+                            seed_to_use = self.lora_config["seed"]
+                        
+                        if seed_to_use is not None:
                             # Find the KSampler node and set the seed
                             for node_id, node in workflow_prompt.items():
                                 if node.get("class_type") == "KSampler" and "inputs" in node:
-                                    node["inputs"]["seed"] = self.lora_config["seed"]
-                                    print(f"  🌱 Using fixed seed: {self.lora_config['seed']}")
+                                    node["inputs"]["seed"] = seed_to_use
+                                    print(f"  🌱 Using seed: {seed_to_use}")
                                     break
                         
                         # Log final prompts sent to ComfyUI

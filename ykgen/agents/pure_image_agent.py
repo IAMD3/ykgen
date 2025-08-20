@@ -811,9 +811,12 @@ Only extract features that are explicitly mentioned. If a feature is not describ
                 scene_characters = scene.get('characters', [])
                 if scene_characters:
                     primary_character = scene_characters[0].get('name', 'Unknown')
-                    print_success(f"Scene {scene_index + 1}: Using character '{primary_character}' seed {scene_seed}")
+                    if len(scene_characters) == 1:
+                        print_success(f"Scene {scene_index + 1}: Single character '{primary_character}' - using character's seed {scene_seed}")
+                    else:
+                        print_success(f"Scene {scene_index + 1}: Multiple characters - using primary character '{primary_character}' seed {scene_seed}")
                 else:
-                    print_success(f"Scene {scene_index + 1}: Using scene-specific seed {scene_seed}")
+                    print_success(f"Scene {scene_index + 1}: No characters - using scene-specific seed {scene_seed}")
                 
                 # Generate multiple prompts for this scene if images_per_scene > 1
                 if self.images_per_scene > 1:
