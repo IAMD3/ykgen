@@ -111,17 +111,35 @@ class BaseAgent(ABC):
         characters = state["characters_full"]
         style = state.get("style", self.style)
         
-        # Format characters for the prompt
+        # Format characters for the prompt, using bound descriptions if available
         formatted_characters = []
         for character in characters:
-            formatted_character = (
-                f'name={character["name"]},description={character["description"]}'
-            )
+            character_name = character["name"]
+            
+            # Check if this agent has character bindings (for enhanced consistency)
+            if hasattr(self, 'character_bindings') and character_name in self.character_bindings:
+                # Use bound character description for better consistency
+                bound_description = self.character_bindings[character_name]['description']
+                formatted_character = f'name={character_name},description={bound_description}'
+            else:
+                # Use original character description
+                formatted_character = f'name={character_name},description={character["description"]}'
+            
             formatted_characters.append(formatted_character)
 
         character_str = "| ".join(formatted_characters)
 
         # Build base system message for prompt generation
+        character_binding_context = ""
+        if hasattr(self, 'character_bindings') and self.character_bindings:
+            character_binding_context = (
+                "\n\nCHARACTER BINDING SYSTEM ACTIVE: "
+                "The provided character descriptions are bound character models with precise visual details. "
+                "You MUST use these exact character descriptions without modification to ensure perfect consistency across all scenes. "
+                "Do not change any character features like hair color, eye color, clothing, or physical attributes. "
+                "Character consistency is the highest priority."
+            )
+        
         system_message = (
             "You are an expert prompt engineer for AI image generation models like Stable Diffusion. "
             "Your task is to generate high-quality positive and negative prompts for each scene to create "
@@ -132,6 +150,7 @@ class BaseAgent(ABC):
             "Negative prompt: low quality, worst quality, normal quality, text, signature, jpeg artifacts, bad anatomy, old, early\n\n"
             "Follow this format and quality level for all prompts you generate. "
             "important: if you generate the prompt related to a character, the character must be detailed described including the haircut, face description, body description, eye, etc(other detailed description). The length of each prompt would be better within 100 tokens."
+            + character_binding_context
         )
 
         # Build LoRA trigger words context

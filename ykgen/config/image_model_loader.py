@@ -109,7 +109,7 @@ def get_model_category(model_name: str) -> Optional[str]:
     """Get the category (workflow type) for a specific model.
     
     Args:
-        model_name: The name of the model
+        model_name: The name of the model or lora_config_key
         
     Returns:
         Category name if found, None otherwise
@@ -119,7 +119,9 @@ def get_model_category(model_name: str) -> Optional[str]:
     for category, category_data in config.items():
         if isinstance(category_data, dict) and "models" in category_data:
             for model in category_data["models"]:
-                if model.get("name") == model_name:
+                # Check both model name and lora_config_key
+                if (model.get("name") == model_name or 
+                    model.get("lora_config_key") == model_name):
                     return category
     
     return None
