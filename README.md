@@ -41,6 +41,20 @@ YKGen is an AI generation content tool that transforms simple text prompts into 
 
 ### quick start
 
+```env
+# Required API Keys
+LLM_API_KEY=your_llm_api_key_here
+LLM_BASE_URL=https://api.your-provider.com/v1
+LLM_MODEL=your_model_name
+SILICONFLOW_VIDEO_KEY=your_siliconflow_video_key_here
+
+
+# Optional Settings
+COMFYUI_HOST=127.0.0.1
+COMFYUI_PORT=8188
+MAX_SCENES=3
+```
+
 YKGen offers two ways to interact with the system:
 
 #### Option 1: Web User Interface (WebUI) - Recommended
@@ -65,19 +79,7 @@ notice:
 #### Configuration
 Create a `.env` file with your API keys, or rename env.example to `.env`:
 
-```env
-# Required API Keys
-LLM_API_KEY=your_llm_api_key_here
-LLM_BASE_URL=https://api.your-provider.com/v1
-LLM_MODEL=your_model_name
-SILICONFLOW_VIDEO_KEY=your_siliconflow_video_key_here
 
-
-# Optional Settings
-COMFYUI_HOST=127.0.0.1
-COMFYUI_PORT=8188
-MAX_SCENES=3
-```
 
 The system will guide you through:
 1. Selecting an agent type (VideoAgent, PoetryAgent, or PureImageAgent)

@@ -39,6 +39,24 @@ YKGen是一个AI生成内容工具，能够将简单的文本提示转换为完�
 
 ### 快速开始
 
+#### 配置
+创建包含您的API密钥的`.env`文件，或将env.example重命名为`.env`：
+
+```env
+# 必需的API密钥
+LLM_API_KEY=your_llm_api_key_here
+LLM_BASE_URL=https://api.your-provider.com/v1
+LLM_MODEL=your_model_name
+SILICONFLOW_VIDEO_KEY=your_siliconflow_video_key_here
+
+
+# 可选设置
+COMFYUI_HOST=127.0.0.1
+COMFYUI_PORT=8188
+MAX_SCENES=3
+```
+
+
 YKGen提供两种与系统交互的方式：
 
 #### 选项1：Web用户界面（WebUI）- 推荐
@@ -60,22 +78,7 @@ uv run python main.py
 * 使用前需要设置ComfyUI，不用担心这是唯一依赖的外部服务
 * 按以下方式配置.env文件：
 
-#### 配置
-创建包含您的API密钥的`.env`文件，或将env.example重命名为`.env`：
 
-```env
-# 必需的API密钥
-LLM_API_KEY=your_llm_api_key_here
-LLM_BASE_URL=https://api.your-provider.com/v1
-LLM_MODEL=your_model_name
-SILICONFLOW_VIDEO_KEY=your_siliconflow_video_key_here
-
-
-# 可选设置
-COMFYUI_HOST=127.0.0.1
-COMFYUI_PORT=8188
-MAX_SCENES=3
-```
 
 系统将引导您完成：
 1. 选择代理类型（VideoAgent、PoetryAgent或PureImageAgent）
