@@ -39,19 +39,11 @@ YKGen是一个AI生成内容工具，能够将简单的文本提示转换为完�
 
 ### 快速开始
 
-使用YKGen最简单的方式是通过其交互式CLI：
-```bash
-# 启动YKGen
-uv run python main.py
-```
-
+#### 配置
+创建包含您的API密钥的`.env`文件，或将env.example重命名为`.env`：
 注意：
 * 使用前需要设置ComfyUI，不用担心这是唯一依赖的外部服务
 * 按以下方式配置.env文件：
-
-#### 配置
-创建包含您的API密钥的`.env`文件，或将env.example重命名为`.env`：
-
 ```env
 # 必需的API密钥
 LLM_API_KEY=your_llm_api_key_here
@@ -66,12 +58,56 @@ COMFYUI_PORT=8188
 MAX_SCENES=3
 ```
 
+
+YKGen提供两种与系统交互的方式：
+
+#### 选项1：Web用户界面（WebUI）- 推荐
+为了获得最佳用户体验，我们推荐使用Web界面：
+```bash
+# 启动YKGen WebUI
+uv run webui.py
+```
+然后在浏览器中打开 `http://localhost:8080`。
+
+#### 选项2：命令行界面（CLI）
+或者，您也可以使用交互式CLI：
+```bash
+# 启动YKGen CLI
+uv run python main.py
+```
 系统将引导您完成：
 1. 选择代理类型（VideoAgent、PoetryAgent或PureImageAgent）
 2. 如果选择视频代理，选择视频提供商（SiliconFlow）
 3. 选择LoRA模型进行图像风格增强
 4. 输入您的创意提示
 5. 观看实时进度显示的生成过程
+
+### Web UI界面
+
+YKGen还提供用户友好的Web界面，便于交互：
+
+```bash
+# 启动Web UI
+uv run webui.py
+```
+
+Web界面将在`http://localhost:8080`可用，并提供：
+
+![WebUI示例](./example/webui_example.png)
+
+**功能特性：**
+- **代理选择**：在VideoAgent、PoetryAgent或PureImageAgent之间选择
+- **模型配置**：选择和配置图像模型和LoRA风格
+- **实时进度**：观看详细的分步更新生成进度
+- **交互控制**：所有生成参数的易用界面
+- **实时预览**：在创建时查看生成的内容
+
+**Web UI入门指南：**
+1. 确保ComfyUI在`http://127.0.0.1:8188`运行
+2. 使用API密钥配置您的`.env`文件
+3. 运行`uv run webui.py`启动Web服务器
+4. 在浏览器中打开`http://localhost:8080`
+5. 选择您偏好的代理并开始创作！
 
 ## ComfyUI集成（唯一的外部依赖）
 

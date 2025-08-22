@@ -267,10 +267,12 @@ Output ONLY the formatted pinyin, no explanations."""
         Characters: {character_str}
         Visual Style: {style}
         
+        IMPORTANT: You MUST only use the characters listed above. Do NOT create or introduce any new characters that are not in the provided character list. If the story mentions other entities, treat them as environmental elements or background elements, not as characters.
+        
         For each scene, focus on:
         1. Location - Where the scene takes place
         2. Time - When in the story this happens (beginning, middle, end, etc.)
-        3. Characters - Which characters are present in this scene
+        3. Characters - Which characters from the provided list are present in this scene (use ONLY the provided characters)
         4. Action - What is happening in this scene
         
         Create scenes that tell the story visually through character actions and environmental details.
@@ -281,10 +283,12 @@ Output ONLY the formatted pinyin, no explanations."""
         Story: {state['story_full'].content}
         Characters: {character_str}
         
+        IMPORTANT: You MUST only use the characters listed above. Do NOT create or introduce any new characters that are not in the provided character list. If the story mentions other entities, treat them as environmental elements or background elements, not as characters.
+        
         For each scene, focus on:
         1. Location - Where the scene takes place
         2. Time - When in the story this happens (beginning, middle, end, etc.)
-        3. Characters - Which characters are present in this scene
+        3. Characters - Which characters from the provided list are present in this scene (use ONLY the provided characters)
         4. Action - What is happening in this scene
         
         Create scenes that tell the story visually through character actions and environmental details.
@@ -811,9 +815,12 @@ Only extract features that are explicitly mentioned. If a feature is not describ
                 scene_characters = scene.get('characters', [])
                 if scene_characters:
                     primary_character = scene_characters[0].get('name', 'Unknown')
-                    print_success(f"Scene {scene_index + 1}: Using character '{primary_character}' seed {scene_seed}")
+                    if len(scene_characters) == 1:
+                        print_success(f"Scene {scene_index + 1}: Single character '{primary_character}' - using character's seed {scene_seed}")
+                    else:
+                        print_success(f"Scene {scene_index + 1}: Multiple characters - using primary character '{primary_character}' seed {scene_seed}")
                 else:
-                    print_success(f"Scene {scene_index + 1}: Using scene-specific seed {scene_seed}")
+                    print_success(f"Scene {scene_index + 1}: No characters - using scene-specific seed {scene_seed}")
                 
                 # Generate multiple prompts for this scene if images_per_scene > 1
                 if self.images_per_scene > 1:
@@ -827,9 +834,10 @@ Only extract features that are explicitly mentioned. If a feature is not describ
                         "bright_blue",
                     )
                     
-                    # Create a modified scene with the current prompt
+                    # Create a modified scene with the current prompt and seed
                     scene_copy = scene.copy()
                     scene_copy["image_prompt_positive"] = prompt
+                    scene_copy["seed"] = scene_seed  # Add seed to scene data
                     
                     # Create a single-scene list for the adaptive generation function
                     single_scene = [scene_copy]

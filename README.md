@@ -40,20 +40,11 @@ YKGen is an AI generation content tool that transforms simple text prompts into 
 
 
 ### quick start
-
-The simplest way to use YKGen is through its interactive CLI:
-```bash
-# Start YKGen
-uv run python main.py
-```
-
 notice: 
 * you need to set up comfyui before use, no worry it is the only external service relied on
 * configure the .env as below:
-
 #### Configuration
 Create a `.env` file with your API keys, or rename env.example to `.env`:
-
 ```env
 # Required API Keys
 LLM_API_KEY=your_llm_api_key_here
@@ -68,12 +59,58 @@ COMFYUI_PORT=8188
 MAX_SCENES=3
 ```
 
+YKGen offers two ways to interact with the system:
+
+#### Option 1: Web User Interface (WebUI) - Recommended
+For the best user experience, we recommend using the web interface:
+```bash
+# Start YKGen WebUI
+uv run webui.py
+```
+Then open `http://localhost:8080` in your browser.
+
+#### Option 2: Command Line Interface (CLI)
+Alternatively, you can use the interactive CLI:
+```bash
+# Start YKGen CLI
+uv run python main.py
+```
+
+
+
 The system will guide you through:
 1. Selecting an agent type (VideoAgent, PoetryAgent, or PureImageAgent)
 2. Choosing a video provider if you choose video agent  (SiliconFlow)
 3. Selecting LoRA models for image style enhancement
 4. Entering your creative prompt
 5. Watching the generation process with real-time progress display
+
+### Web UI Interface
+
+YKGen also provides a user-friendly web interface for easier interaction:
+
+```bash
+# Start the Web UI
+uv run webui.py
+```
+
+The web interface will be available at `http://localhost:8080` and provides:
+
+![WebUI Example](./example/webui_example.png)
+
+**Features:**
+- **Agent Selection**: Choose between VideoAgent, PoetryAgent, or PureImageAgent
+- **Model Configuration**: Select and configure image models and LoRA styles
+- **Real-time Progress**: Watch generation progress with detailed step-by-step updates
+- **Interactive Controls**: Easy-to-use interface for all generation parameters
+- **Live Preview**: View generated content as it's created
+
+**Getting Started with Web UI:**
+1. Ensure ComfyUI is running on `http://127.0.0.1:8188`
+2. Configure your `.env` file with API keys
+3. Run `uv run webui.py` to start the web server
+4. Open `http://localhost:8080` in your browser
+5. Select your preferred agent and start creating!
 
 
 ## ComfyUI Integration (the only external dependency)
