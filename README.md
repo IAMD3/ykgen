@@ -40,7 +40,11 @@ YKGen is an AI generation content tool that transforms simple text prompts into 
 
 
 ### quick start
-
+notice: 
+* you need to set up comfyui before use, no worry it is the only external service relied on
+* configure the .env as below:
+#### Configuration
+Create a `.env` file with your API keys, or rename env.example to `.env`:
 ```env
 # Required API Keys
 LLM_API_KEY=your_llm_api_key_here
@@ -71,13 +75,6 @@ Alternatively, you can use the interactive CLI:
 # Start YKGen CLI
 uv run python main.py
 ```
-
-notice: 
-* you need to set up comfyui before use, no worry it is the only external service relied on
-* configure the .env as below:
-
-#### Configuration
-Create a `.env` file with your API keys, or rename env.example to `.env`:
 
 
 

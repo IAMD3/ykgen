@@ -41,7 +41,9 @@ YKGen是一个AI生成内容工具，能够将简单的文本提示转换为完�
 
 #### 配置
 创建包含您的API密钥的`.env`文件，或将env.example重命名为`.env`：
-
+注意：
+* 使用前需要设置ComfyUI，不用担心这是唯一依赖的外部服务
+* 按以下方式配置.env文件：
 ```env
 # 必需的API密钥
 LLM_API_KEY=your_llm_api_key_here
@@ -73,13 +75,6 @@ uv run webui.py
 # 启动YKGen CLI
 uv run python main.py
 ```
-
-注意：
-* 使用前需要设置ComfyUI，不用担心这是唯一依赖的外部服务
-* 按以下方式配置.env文件：
-
-
-
 系统将引导您完成：
 1. 选择代理类型（VideoAgent、PoetryAgent或PureImageAgent）
 2. 如果选择视频代理，选择视频提供商（SiliconFlow）
