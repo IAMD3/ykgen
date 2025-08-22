@@ -67,6 +67,119 @@ class GenerationStatus(BaseModel):
 # Global storage for generation tasks
 generation_tasks: Dict[str, GenerationStatus] = {}
 
+# Progress tracking utilities
+class ProgressTracker:
+    """Tracks detailed progress for generation workflows."""
+    
+    def __init__(self, task_id: str, agent_type: str):
+        self.task_id = task_id
+        self.agent_type = agent_type
+        self.current_step = 0
+        self.total_steps = self._get_total_steps()
+        
+    def _get_total_steps(self) -> int:
+        """Get total number of steps based on agent type."""
+        if self.agent_type == "video_agent":
+            return 8  # story, characters, scenes, prompts, images, videos, audio, wait
+        elif self.agent_type in ["poetry_agent", "poetry_agent_pure_image"]:
+            return 6  # story, characters, scenes, prompts, images, audio
+        elif self.agent_type == "pure_image_agent":
+            return 3  # prompt processing, image generation, finalization
+        return 5  # default
+    
+    async def update_step(self, step_name: str, progress_percent: float, details: str = ""):
+        """Update progress for a specific step."""
+        self.current_step += 1
+        message = f"📋 Step {self.current_step}/{self.total_steps}: {step_name}"
+        if details:
+            message += f" - {details}"
+        await update_progress(self.task_id, progress_percent, message)
+        
+    async def complete_step(self, step_name: str, progress_percent: float, result_info: str = ""):
+        """Mark a step as completed."""
+        message = f"✅ {step_name} completed"
+        if result_info:
+            message += f" - {result_info}"
+        await update_progress(self.task_id, progress_percent, message)
+
+async def update_progress(task_id: str, progress: float, message: str):
+    """Update progress for a generation task."""
+    if task_id in generation_tasks:
+        generation_tasks[task_id].progress = progress
+        generation_tasks[task_id].message = message
+        generation_tasks[task_id].updated_at = datetime.now()
+        # Small delay to make progress visible
+        await asyncio.sleep(0.1)
+
+async def generate_with_progress(agent, prompt: str, tracker: ProgressTracker):
+    """Generate content with detailed progress tracking."""
+    # Step 1: Story Generation
+    await tracker.update_step("Story Generation", 15.0, "Creating narrative from your prompt")
+    
+    # Create initial state
+    from langchain_core.messages import HumanMessage
+    from ykgen.model.models import VisionState
+    
+    initial_state = VisionState(prompt=HumanMessage(content=prompt))
+    if hasattr(agent, 'style') and agent.style:
+        initial_state["style"] = agent.style
+    
+    # Execute story generation
+    state = agent.generate_story(initial_state)
+    await tracker.complete_step("Story Generation", 25.0, "Narrative created successfully")
+    
+    if tracker.agent_type in ["poetry_agent", "video_agent", "poetry_agent_pure_image"]:
+        # Step 2: Character Extraction
+        await tracker.update_step("Character Extraction", 35.0, "Analyzing story for character details")
+        state = agent.generate_characters(state)
+        char_count = len(state.get("characters_full", []))
+        await tracker.complete_step("Character Extraction", 45.0, f"{char_count} characters identified")
+        
+        # Step 3: Scene Generation
+        await tracker.update_step("Scene Generation", 55.0, "Breaking story into visual scenes")
+        state = agent.generate_scenes(state)
+        scene_count = len(state.get("scenes", []))
+        await tracker.complete_step("Scene Generation", 65.0, f"{scene_count} scenes created")
+        
+        # Step 4: Prompt Generation
+        await tracker.update_step("Prompt Generation", 70.0, "Creating detailed image prompts")
+        state = agent.generate_prompts(state)
+        await tracker.complete_step("Prompt Generation", 75.0, "Image prompts optimized")
+        
+        # Step 5: Image Generation
+        await tracker.update_step("Image Generation", 80.0, "Generating images with ComfyUI")
+        state = agent.generate_images(state)
+        await tracker.complete_step("Image Generation", 85.0, "Images generated successfully")
+        
+        if tracker.agent_type == "video_agent":
+            # Step 6: Video Generation
+            await tracker.update_step("Video Generation", 87.0, "Creating videos from images")
+            state = agent.generate_videos(state)
+            await tracker.complete_step("Video Generation", 89.0, "Videos created")
+            
+            # Step 7: Audio Generation
+            if hasattr(agent, 'enable_audio') and agent.enable_audio:
+                await tracker.update_step("Audio Generation", 91.0, "Generating background audio")
+                state = agent.generate_audio(state)
+                await tracker.complete_step("Audio Generation", 93.0, "Audio track created")
+            
+            # Step 8: Final Processing
+            await tracker.update_step("Final Processing", 94.0, "Waiting for video completion")
+            state = agent.wait_for_videos(state)
+        elif hasattr(agent, 'enable_audio') and agent.enable_audio:
+            # Audio for poetry agents
+            await tracker.update_step("Audio Generation", 87.0, "Generating background audio")
+            state = agent.generate_audio(state)
+            await tracker.complete_step("Audio Generation", 90.0, "Audio track created")
+    
+    elif tracker.agent_type == "pure_image_agent":
+        # Step 2: Image Processing
+        await tracker.update_step("Image Processing", 50.0, "Processing image prompt")
+        state = agent.generate(prompt)
+        await tracker.complete_step("Image Processing", 80.0, "Image generated successfully")
+    
+    return state
+
 # Initialize FastAPI app
 app = FastAPI(
     title="YKGen Web UI",
@@ -251,6 +364,108 @@ async def root():
             color: #666;
             font-style: italic;
             margin-top: 10px;
+        }
+        
+        .overall-progress {
+            margin-bottom: 20px;
+        }
+        
+        .overall-progress h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .progress-percentage {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
+        }
+        
+        .step-status {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .step-status h5 {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .step-details {
+            color: #666;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        
+        .step-timeline {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .step-timeline h5 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .timeline-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .timeline-step.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .timeline-step.active {
+            background: #cce7ff;
+            color: #004085;
+            font-weight: bold;
+        }
+        
+        .timeline-step.pending {
+            background: #f8f9fa;
+            color: #6c757d;
+        }
+        
+        .step-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .timeline-step.completed .step-icon {
+            background: #28a745;
+            color: white;
+        }
+        
+        .timeline-step.active .step-icon {
+            background: #007bff;
+            color: white;
+        }
+        
+        .timeline-step.pending .step-icon {
+            background: #e9ecef;
+            color: #6c757d;
         }
         
         .results-section {
@@ -637,11 +852,54 @@ async def root():
         </form>
         
         <div class="progress-section" id="progressSection">
-            <h3>Generation Progress</h3>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
+            <h3>🎯 Generation Progress</h3>
+            
+            <!-- Overall Progress -->
+            <div class="overall-progress">
+                <h4>Overall Progress</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-percentage" id="progressPercentage">0%</div>
             </div>
-            <div class="status-message" id="statusMessage">Initializing...</div>
+            
+            <!-- Current Step Status -->
+            <div class="step-status">
+                <h5>Current Step</h5>
+                <div id="currentStepName">Initializing</div>
+                <div class="step-details" id="currentStepDetails">🚀 Preparing generation...</div>
+            </div>
+            
+            <!-- Step Timeline -->
+            <div class="step-timeline">
+                <h5>Workflow Steps</h5>
+                <div class="timeline-step pending" id="timeline-step-0">
+                    <div class="step-icon">1</div>
+                    <div>Story Generation</div>
+                </div>
+                <div class="timeline-step pending" id="timeline-step-1">
+                    <div class="step-icon">2</div>
+                    <div>Character Extraction</div>
+                </div>
+                <div class="timeline-step pending" id="timeline-step-2">
+                    <div class="step-icon">3</div>
+                    <div>Scene Generation</div>
+                </div>
+                <div class="timeline-step pending" id="timeline-step-3">
+                    <div class="step-icon">4</div>
+                    <div>Image Generation</div>
+                </div>
+                <div class="timeline-step pending" id="timeline-step-4">
+                    <div class="step-icon">5</div>
+                    <div>Video Generation</div>
+                </div>
+                <div class="timeline-step pending" id="timeline-step-5">
+                    <div class="step-icon">6</div>
+                    <div>Audio Generation</div>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage">🚀 Initializing...</div>
         </div>
         
         <div class="results-section" id="resultsSection">
@@ -893,9 +1151,63 @@ async def root():
         function updateProgress(status) {
             const progressFill = document.getElementById('progressFill');
             const statusMessage = document.getElementById('statusMessage');
+            const progressPercentage = document.getElementById('progressPercentage');
+            const currentStepName = document.getElementById('currentStepName');
+            const currentStepDetails = document.getElementById('currentStepDetails');
             
+            // Update overall progress
             progressFill.style.width = `${status.progress}%`;
+            progressPercentage.textContent = `${Math.round(status.progress)}%`;
             statusMessage.textContent = status.message;
+            
+            // Parse step information from message
+            const stepInfo = parseStepInfo(status.message);
+            if (stepInfo) {
+                currentStepName.textContent = stepInfo.name;
+                currentStepDetails.textContent = stepInfo.details;
+                updateTimeline(stepInfo.name, stepInfo.status);
+            }
+        }
+        
+        function parseStepInfo(message) {
+            // Extract step information from progress messages
+            if (message.includes('Story generation')) {
+                return { name: 'Story Generation', details: message, status: message.includes('completed') ? 'completed' : 'active' };
+            } else if (message.includes('Character')) {
+                return { name: 'Character Extraction', details: message, status: message.includes('completed') ? 'completed' : 'active' };
+            } else if (message.includes('Scene')) {
+                return { name: 'Scene Generation', details: message, status: message.includes('completed') ? 'completed' : 'active' };
+            } else if (message.includes('Image')) {
+                return { name: 'Image Generation', details: message, status: message.includes('completed') ? 'completed' : 'active' };
+            } else if (message.includes('Video')) {
+                return { name: 'Video Generation', details: message, status: message.includes('completed') ? 'completed' : 'active' };
+            } else if (message.includes('Audio')) {
+                return { name: 'Audio Generation', details: message, status: message.includes('completed') ? 'completed' : 'active' };
+            }
+            return { name: 'Processing', details: message, status: 'active' };
+        }
+        
+        function updateTimeline(currentStep, status) {
+            const steps = ['Story Generation', 'Character Extraction', 'Scene Generation', 'Image Generation', 'Video Generation', 'Audio Generation'];
+            
+            steps.forEach((step, index) => {
+                const stepElement = document.getElementById(`timeline-step-${index}`);
+                if (stepElement) {
+                    stepElement.className = 'timeline-step';
+                    const icon = stepElement.querySelector('.step-icon');
+                    
+                    if (step === currentStep) {
+                        stepElement.classList.add(status === 'completed' ? 'completed' : 'active');
+                        icon.textContent = status === 'completed' ? '✓' : (index + 1);
+                    } else if (steps.indexOf(currentStep) > index) {
+                        stepElement.classList.add('completed');
+                        icon.textContent = '✓';
+                    } else {
+                        stepElement.classList.add('pending');
+                        icon.textContent = index + 1;
+                    }
+                }
+            });
         }
         
 
@@ -1169,56 +1481,17 @@ async def run_generation(task_id: str, request: GenerationRequest):
         if lora_config:
             AgentFactory.configure_lora_mode(agent, lora_config)
         
-        # Update progress for story generation
-        generation_tasks[task_id].progress = 25.0
-        generation_tasks[task_id].message = "Generating story from prompt..."
-        generation_tasks[task_id].updated_at = datetime.now()
+        # Start detailed progress tracking
+        await update_progress(task_id, 10.0, "🚀 Initializing generation workflow...")
         
-        # Generate content using string prompt (not HumanMessage)
-        result = agent.generate(request.prompt)
+        # Create progress tracker for this generation
+        progress_tracker = ProgressTracker(task_id, request.agent_type)
         
-        # Simulate detailed progress updates based on agent type
-        if request.agent_type in ["poetry_agent", "video_agent", "poetry_agent_pure_image"]:
-            # Story generation completed
-            await asyncio.sleep(0.5)  # Brief delay to make progress visible
-            generation_tasks[task_id].progress = 40.0
-            generation_tasks[task_id].message = "✓ Story generation completed"
-            generation_tasks[task_id].updated_at = datetime.now()
-            
-            # Character extraction
-            await asyncio.sleep(0.5)
-            generation_tasks[task_id].progress = 55.0
-            generation_tasks[task_id].message = "Extracting characters from story with LoRA optimization..."
-            generation_tasks[task_id].updated_at = datetime.now()
-            
-            # Character extraction completed
-            await asyncio.sleep(0.5)
-            generation_tasks[task_id].progress = 70.0
-            generation_tasks[task_id].message = f"✓ Character extraction completed - {request.max_characters} characters generated with persistent seeds"
-            generation_tasks[task_id].updated_at = datetime.now()
-            
-            # Character binding
-            await asyncio.sleep(0.5)
-            generation_tasks[task_id].progress = 80.0
-            generation_tasks[task_id].message = "Binding character descriptions to character models..."
-            generation_tasks[task_id].updated_at = datetime.now()
-            
-            # Character binding completed
-            await asyncio.sleep(0.5)
-            generation_tasks[task_id].progress = 85.0
-            generation_tasks[task_id].message = f"✓ Character binding completed - {request.max_characters} characters bound"
-            generation_tasks[task_id].updated_at = datetime.now()
-        elif request.agent_type == "pure_image_agent":
-            # Pure image generation progress
-            await asyncio.sleep(0.5)
-            generation_tasks[task_id].progress = 50.0
-            generation_tasks[task_id].message = "Processing image prompt..."
-            generation_tasks[task_id].updated_at = datetime.now()
-            
-            await asyncio.sleep(0.5)
-            generation_tasks[task_id].progress = 75.0
-            generation_tasks[task_id].message = "✓ Image generation completed"
-            generation_tasks[task_id].updated_at = datetime.now()
+        # Generate content using string prompt with progress tracking
+        result = await generate_with_progress(agent, request.prompt, progress_tracker)
+        
+        # Mark workflow completion
+        await update_progress(task_id, 95.0, "✅ Generation workflow completed successfully!")
         
         # Final processing
         generation_tasks[task_id].progress = 90.0
