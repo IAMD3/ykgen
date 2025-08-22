@@ -295,10 +295,12 @@ Visual Story:
 Characters: {character_str}
 Visual Style: {style}
 
+IMPORTANT: You MUST only use the characters listed above. Do NOT create or introduce any new characters that are not in the provided character list. If the story mentions other entities, treat them as environmental elements or background elements, not as characters.
+
 Create {config.MAX_SCENES} scenes focusing on:
 1. Location - Where the poetic scene takes place
 2. Time - The temporal setting or mood of the poetry
-3. Characters - Which characters or elements are present
+3. Characters - Which characters from the provided list are present (use ONLY the provided characters)
 4. Action - What is happening or being contemplated (keep actions simple and graceful for 5-second videos)
 
 IMPORTANT: Each scene will become a 5-second video clip. Design actions that:
@@ -321,10 +323,12 @@ Visual Story:
 
 Characters: {character_str}
 
+IMPORTANT: You MUST only use the characters listed above. Do NOT create or introduce any new characters that are not in the provided character list. If the story mentions other entities, treat them as environmental elements or background elements, not as characters.
+
 Create {config.MAX_SCENES} scenes focusing on:
 1. Location - Where the poetic scene takes place
 2. Time - The temporal setting or mood of the poetry
-3. Characters - Which characters or elements are present
+3. Characters - Which characters from the provided list are present (use ONLY the provided characters)
 4. Action - What is happening or being contemplated (keep actions simple and graceful for 5-second videos)
 
 IMPORTANT: Each scene will become a 5-second video clip. Design actions that:

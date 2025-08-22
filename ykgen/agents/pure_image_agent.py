@@ -267,10 +267,12 @@ Output ONLY the formatted pinyin, no explanations."""
         Characters: {character_str}
         Visual Style: {style}
         
+        IMPORTANT: You MUST only use the characters listed above. Do NOT create or introduce any new characters that are not in the provided character list. If the story mentions other entities, treat them as environmental elements or background elements, not as characters.
+        
         For each scene, focus on:
         1. Location - Where the scene takes place
         2. Time - When in the story this happens (beginning, middle, end, etc.)
-        3. Characters - Which characters are present in this scene
+        3. Characters - Which characters from the provided list are present in this scene (use ONLY the provided characters)
         4. Action - What is happening in this scene
         
         Create scenes that tell the story visually through character actions and environmental details.
@@ -281,10 +283,12 @@ Output ONLY the formatted pinyin, no explanations."""
         Story: {state['story_full'].content}
         Characters: {character_str}
         
+        IMPORTANT: You MUST only use the characters listed above. Do NOT create or introduce any new characters that are not in the provided character list. If the story mentions other entities, treat them as environmental elements or background elements, not as characters.
+        
         For each scene, focus on:
         1. Location - Where the scene takes place
         2. Time - When in the story this happens (beginning, middle, end, etc.)
-        3. Characters - Which characters are present in this scene
+        3. Characters - Which characters from the provided list are present in this scene (use ONLY the provided characters)
         4. Action - What is happening in this scene
         
         Create scenes that tell the story visually through character actions and environmental details.
