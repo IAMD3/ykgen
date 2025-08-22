@@ -1421,11 +1421,20 @@ async def run_generation(task_id: str, request: GenerationRequest):
             
             # Use the selected model name to get the correct LoRA config key
             model_type = get_lora_key_for_model_type(request.model_name)
+            
+            # Generate a consistent seed based on the prompt for webui mode (no LoRA case)
+            import hashlib
+            prompt_key = f"webui_{request.prompt.lower()}"
+            hash_object = hashlib.md5(prompt_key.encode())
+            hash_hex = hash_object.hexdigest()
+            webui_seed = int(hash_hex[:8], 16) % 2147483647 + 1
+            
             lora_config = {
                 "name": "No LoRA",
                 "file": None,
                 "trigger": "",
-                "model_type": model_type
+                "model_type": model_type,
+                "seed": webui_seed  # Add seed for no LoRA case
             }
         
         # Set environment variables for MAX_CHARACTERS and MAX_SCENES
@@ -1592,10 +1601,20 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
         if not selected_lora_configs:
             return None
         
+        # Generate a consistent seed based on the prompt for webui mode
+        # This ensures different prompts get different seeds but same prompt gets same seed
+        import hashlib
+        prompt_key = f"webui_{request.prompt.lower()}"
+        hash_object = hashlib.md5(prompt_key.encode())
+        hash_hex = hash_object.hexdigest()
+        webui_seed = int(hash_hex[:8], 16) % 2147483647 + 1
+        
         # Create LoRA configuration based on mode
         if request.lora_mode == "all":
             if len(selected_lora_configs) == 1:
-                return selected_lora_configs[0]
+                config_result = selected_lora_configs[0]
+                config_result["seed"] = webui_seed  # Add seed to single LoRA config
+                return config_result
             else:
                 # Multiple LoRAs for "all" mode
                 combined_name = " + ".join([lora["name"] for lora in selected_lora_configs])
@@ -1607,7 +1626,8 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
                     "trigger": combined_trigger,
                     "model_type": model_type,
                     "loras": selected_lora_configs,
-                    "is_multiple": True
+                    "is_multiple": True,
+                    "seed": webui_seed  # Add seed to multiple LoRA config
                 }
         elif request.lora_mode == "group":
             # For group mode, treat all selected as required LoRAs
@@ -1617,7 +1637,8 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
                 "required_loras": selected_lora_configs,
                 "optional_loras": [],
                 "required_trigger": ", ".join([lora["trigger"] for lora in selected_lora_configs if lora["trigger"]]),
-                "optional_descriptions": []
+                "optional_descriptions": [],
+                "seed": webui_seed  # Add seed to group mode config
             }
         
         return None
