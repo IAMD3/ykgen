@@ -1340,21 +1340,33 @@ async def root():
         
         function getSelectedLoRAs() {
             const loraMode = document.getElementById('lora_mode').value;
+            console.log('getSelectedLoRAs called with mode:', loraMode);
             
             if (loraMode === 'group') {
+                const required = getSelectedLoRAsByType('required');
+                const optional = getSelectedLoRAsByType('optional');
+                console.log('Group mode - required checkboxes found:', required);
+                console.log('Group mode - optional checkboxes found:', optional);
                 return {
-                    required_loras: getSelectedLoRAsByType('required'),
-                    optional_loras: getSelectedLoRAsByType('optional')
+                    required_loras: required,
+                    optional_loras: optional
                 };
             } else {
                 const checkboxes = document.querySelectorAll('input[name="lora_models"]:checked');
-                return Array.from(checkboxes).map(cb => cb.value);
+                const selected = Array.from(checkboxes).map(cb => cb.value);
+                console.log('Non-group mode - selected:', selected);
+                return selected;
             }
         }
         
         function getSelectedLoRAsByType(type) {
-            const checkboxes = document.querySelectorAll(`input[name="${type}_loras"]:checked`);
-            return Array.from(checkboxes).map(cb => cb.value);
+            const selector = `input[name="${type}_loras"]:checked`;
+            console.log('getSelectedLoRAsByType selector:', selector);
+            const checkboxes = document.querySelectorAll(selector);
+            console.log('Found checkboxes for', type, ':', checkboxes.length);
+            const values = Array.from(checkboxes).map(cb => cb.value);
+            console.log('Values for', type, ':', values);
+            return values;
         }
         
         function updateRequiredLoRAButtons() {
@@ -1420,15 +1432,23 @@ async def root():
             };
             
             // Handle LoRA selection based on mode
+            console.log('LoRA Mode:', loraMode);
+            console.log('Selected LoRAs:', selectedLoras);
+            
             if (loraMode === 'group') {
                 data.required_loras = selectedLoras.required_loras;
                 data.optional_loras = selectedLoras.optional_loras;
                 data.selected_loras = null;
+                console.log('Group mode - Required:', data.required_loras);
+                console.log('Group mode - Optional:', data.optional_loras);
             } else {
                 data.selected_loras = selectedLoras;
                 data.required_loras = null;
                 data.optional_loras = null;
+                console.log('Non-group mode - Selected:', data.selected_loras);
             }
+            
+            console.log('Final request data:', data);
             
             if (!data.agent_type) {
                 alert('Please select an agent type');
@@ -1744,7 +1764,15 @@ async def run_generation(task_id: str, request: GenerationRequest):
         
         # Process LoRA configuration
         lora_config = None
-        if request.lora_mode != "none" and request.selected_loras:
+        # Check if we should process LoRA config based on mode and available selections
+        should_process_lora = (
+            request.lora_mode != "none" and (
+                request.selected_loras or  # For 'all' mode
+                (request.lora_mode == "group" and (request.required_loras or request.optional_loras))  # For 'group' mode
+            )
+        )
+        
+        if should_process_lora:
             generation_tasks[task_id].progress = 10.0
             generation_tasks[task_id].message = "Configuring LoRA models..."
             generation_tasks[task_id].updated_at = datetime.now()
@@ -1897,8 +1925,23 @@ def get_lora_key_for_model_type(model_type: str) -> str:
 async def process_lora_config(request: GenerationRequest, task_id: str) -> Optional[Dict[str, Any]]:
     """Process LoRA configuration based on user selection."""
     try:
-        if not request.selected_loras:
-            return None
+        # Debug logging
+        print_info(f"Processing LoRA config for mode: {request.lora_mode}")
+        if request.lora_mode == "group":
+            print_info(f"Required LoRAs: {request.required_loras}")
+            print_info(f"Optional LoRAs: {request.optional_loras}")
+        else:
+            print_info(f"Selected LoRAs: {request.selected_loras}")
+        
+        # Check if we have any LoRA selection based on mode
+        if request.lora_mode == "group":
+            if not request.required_loras and not request.optional_loras:
+                print_info("No LoRAs selected for group mode, returning None")
+                return None
+        else:
+            if not request.selected_loras:
+                print_info("No LoRAs selected for non-group mode, returning None")
+                return None
         
         # Load LoRA configurations
         config_path = get_lora_config_path()
@@ -1918,8 +1961,19 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
         available_loras = lora_configs[model_type]["loras"]
         selected_lora_configs = []
         
-        # Build selected LoRA configurations
-        for lora_id in request.selected_loras:
+        # Build selected LoRA configurations based on mode
+        if request.lora_mode == "group":
+            # For group mode, combine required and optional LoRAs
+            all_selected = []
+            if request.required_loras:
+                all_selected.extend(request.required_loras)
+            if request.optional_loras:
+                all_selected.extend(request.optional_loras)
+        else:
+            # For non-group mode, use selected_loras
+            all_selected = request.selected_loras or []
+        
+        for lora_id in all_selected:
             if lora_id in available_loras:
                 lora_config = available_loras[lora_id]
                 selected_lora_configs.append({
@@ -1967,6 +2021,7 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
                 }
         elif request.lora_mode == "group":
             # For group mode, handle required and optional LoRAs separately
+            print_info("Processing group mode LoRA configuration")
             required_lora_configs = []
             optional_lora_configs = []
             
@@ -2014,7 +2069,7 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
                 }
                 optional_descriptions.append(description)
             
-            return {
+            group_config = {
                 "mode": "group",
                 "model_type": model_type,
                 "required_loras": required_lora_configs,
@@ -2023,6 +2078,8 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
                 "optional_descriptions": optional_descriptions,
                 "seed": webui_seed  # Add seed to group mode config
             }
+            print_info(f"Group mode config created: {group_config['mode']}, Required: {len(required_lora_configs)}, Optional: {len(optional_lora_configs)}")
+            return group_config
         
         return None
         
