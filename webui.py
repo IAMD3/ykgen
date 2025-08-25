@@ -47,6 +47,8 @@ class GenerationRequest(BaseModel):
     max_scenes: int = 5
     lora_mode: str = "all"
     selected_loras: Optional[List[str]] = None
+    required_loras: Optional[List[str]] = None  # For group mode
+    optional_loras: Optional[List[str]] = None  # For group mode
     model_name: str = "WaiNSFW Illustrious"
     # Advanced configuration (optional, uses .env defaults if not provided)
     llm_api_key: Optional[str] = None
@@ -124,58 +126,60 @@ async def generate_with_progress(agent, prompt: str, tracker: ProgressTracker):
     if hasattr(agent, 'style') and agent.style:
         initial_state["style"] = agent.style
     
-    # Execute story generation
-    state = agent.generate_story(initial_state)
+    # Execute story generation (run in executor to avoid blocking)
+    import asyncio
+    loop = asyncio.get_event_loop()
+    state = await loop.run_in_executor(None, agent.generate_story, initial_state)
     await tracker.complete_step("Story Generation", 25.0, "Narrative created successfully")
     
     if tracker.agent_type in ["poetry_agent", "video_agent", "poetry_agent_pure_image"]:
         # Step 2: Character Extraction
         await tracker.update_step("Character Extraction", 35.0, "Analyzing story for character details")
-        state = agent.generate_characters(state)
+        state = await loop.run_in_executor(None, agent.generate_characters, state)
         char_count = len(state.get("characters_full", []))
         await tracker.complete_step("Character Extraction", 45.0, f"{char_count} characters identified")
         
         # Step 3: Scene Generation
         await tracker.update_step("Scene Generation", 55.0, "Breaking story into visual scenes")
-        state = agent.generate_scenes(state)
+        state = await loop.run_in_executor(None, agent.generate_scenes, state)
         scene_count = len(state.get("scenes", []))
         await tracker.complete_step("Scene Generation", 65.0, f"{scene_count} scenes created")
         
         # Step 4: Prompt Generation
         await tracker.update_step("Prompt Generation", 70.0, "Creating detailed image prompts")
-        state = agent.generate_prompts(state)
+        state = await loop.run_in_executor(None, agent.generate_prompts, state)
         await tracker.complete_step("Prompt Generation", 75.0, "Image prompts optimized")
         
         # Step 5: Image Generation
         await tracker.update_step("Image Generation", 80.0, "Generating images with ComfyUI")
-        state = agent.generate_images(state)
+        state = await loop.run_in_executor(None, agent.generate_images, state)
         await tracker.complete_step("Image Generation", 85.0, "Images generated successfully")
         
         if tracker.agent_type == "video_agent":
             # Step 6: Video Generation
             await tracker.update_step("Video Generation", 87.0, "Creating videos from images")
-            state = agent.generate_videos(state)
+            state = await loop.run_in_executor(None, agent.generate_videos, state)
             await tracker.complete_step("Video Generation", 89.0, "Videos created")
             
             # Step 7: Audio Generation
             if hasattr(agent, 'enable_audio') and agent.enable_audio:
                 await tracker.update_step("Audio Generation", 91.0, "Generating background audio")
-                state = agent.generate_audio(state)
+                state = await loop.run_in_executor(None, agent.generate_audio, state)
                 await tracker.complete_step("Audio Generation", 93.0, "Audio track created")
             
             # Step 8: Final Processing
             await tracker.update_step("Final Processing", 94.0, "Waiting for video completion")
-            state = agent.wait_for_videos(state)
+            state = await loop.run_in_executor(None, agent.wait_for_videos, state)
         elif hasattr(agent, 'enable_audio') and agent.enable_audio:
             # Audio for poetry agents
             await tracker.update_step("Audio Generation", 87.0, "Generating background audio")
-            state = agent.generate_audio(state)
+            state = await loop.run_in_executor(None, agent.generate_audio, state)
             await tracker.complete_step("Audio Generation", 90.0, "Audio track created")
     
     elif tracker.agent_type == "pure_image_agent":
         # Step 2: Image Processing
         await tracker.update_step("Image Processing", 50.0, "Processing image prompt")
-        state = agent.generate(prompt)
+        state = await loop.run_in_executor(None, agent.generate, prompt)
         await tracker.complete_step("Image Processing", 80.0, "Image generated successfully")
     
     return state
@@ -614,6 +618,153 @@ async def root():
             padding: 4px 8px;
             border-radius: 6px;
             font-size: 0.8em;
+        }
+        
+        /* Enhanced button styles */
+        .btn {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            vertical-align: middle;
+            user-select: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 1px solid #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            color: white;
+            border: 1px solid #6c757d;
+            box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #545b62 0%, #383d41 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(108, 117, 125, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: 1px solid #28a745;
+            box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838 0%, #1abc9c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-outline-primary {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-outline-primary:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* Step labels enhancement */
+        .group-step-label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Form control enhancements */
+        .form-control, .form-select {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        
+        /* Card enhancements */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Progress bar enhancements */
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        /* Alert enhancements */
+        .alert {
+            border: none;
+            border-radius: 8px;
+            padding: 16px 20px;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
             font-family: monospace;
             display: inline-block;
             margin-top: 8px;
@@ -810,11 +961,53 @@ async def root():
                 </div>
                 
                 <div class="form-group" id="lora_selection_group" style="display: block;">
-                    <label for="lora_models">LoRA Models:</label>
-                    <div id="lora_models_container" class="lora-models-grid">
-                        <div class="loading-spinner">
-                            <div class="spinner"></div>
-                            <p>Loading LoRA models...</p>
+                    <div id="lora_mode_all" style="display: block;">
+                        <label for="lora_models">LoRA Models:</label>
+                        <div id="lora_models_container" class="lora-models-grid">
+                            <div class="loading-spinner">
+                                <div class="spinner"></div>
+                                <p>Loading LoRA models...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="lora_mode_group" style="display: none;">
+                        <div id="group_step_1" style="display: block;">
+                            <label>Step 1: Select Required LoRAs (always used):</label>
+                            <div id="required_loras_container" class="lora-models-grid">
+                                <div class="loading-spinner">
+                                    <div class="spinner"></div>
+                                    <p>Loading LoRA models...</p>
+                                </div>
+                            </div>
+                            <button type="button" id="next_to_optional" class="btn btn-primary" style="margin-top: 15px; display: none; padding: 10px 20px; border-radius: 8px; font-weight: 500; transition: all 0.3s ease;">Next: Select Optional LoRAs →</button>
+                        </div>
+                        
+                        <div id="group_step_2" style="display: none;">
+                            <label>Step 2: Select Optional LoRAs (LLM decides per image):</label>
+                            <div id="optional_loras_container" class="lora-models-grid">
+                                <div class="loading-spinner">
+                                    <div class="spinner"></div>
+                                    <p>Loading LoRA models...</p>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" id="back_to_required" class="btn btn-secondary" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; transition: all 0.3s ease;">← Back: Edit Required LoRAs</button>
+                                <button type="button" id="finish_group_selection" class="btn btn-success" style="padding: 10px 20px; border-radius: 8px; font-weight: 500; transition: all 0.3s ease;">Finish Selection ✓</button>
+                            </div>
+                        </div>
+                        
+                        <div id="group_summary" style="display: none; margin-top: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 12px; border: 1px solid #dee2e6; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <h4 style="margin: 0 0 15px 0; color: #495057; font-weight: 600;">📋 Group Mode Selection Summary</h4>
+                            <div style="margin-bottom: 12px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 4px solid #007bff;">
+                                <strong style="color: #007bff;">Required LoRAs:</strong> 
+                                <span id="required_summary" style="color: #6c757d; margin-left: 8px;">None</span>
+                            </div>
+                            <div style="margin-bottom: 15px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 4px solid #28a745;">
+                                <strong style="color: #28a745;">Optional LoRAs:</strong> 
+                                <span id="optional_summary" style="color: #6c757d; margin-left: 8px;">None</span>
+                            </div>
+                            <button type="button" id="edit_group_selection" class="btn btn-outline-primary" style="padding: 8px 16px; border-radius: 6px; font-weight: 500; transition: all 0.3s ease;">✏️ Edit Selection</button>
                         </div>
                     </div>
                 </div>
@@ -928,13 +1121,71 @@ async def root():
          document.getElementById('lora_mode').addEventListener('change', function() {
              const mode = this.value;
              const selectionGroup = document.getElementById('lora_selection_group');
+             const allModeDiv = document.getElementById('lora_mode_all');
+             const groupModeDiv = document.getElementById('lora_mode_group');
              
              if (mode === 'none') {
                  selectionGroup.style.display = 'none';
              } else {
                  selectionGroup.style.display = 'block';
+                 
+                 if (mode === 'group') {
+                     allModeDiv.style.display = 'none';
+                     groupModeDiv.style.display = 'block';
+                     // Reset group mode to step 1
+                     showGroupStep(1);
+                 } else {
+                     allModeDiv.style.display = 'block';
+                     groupModeDiv.style.display = 'none';
+                 }
+                 
                  loadLoRAModels();
              }
+         });
+         
+         // Group mode navigation functions
+         function showGroupStep(step) {
+             const step1 = document.getElementById('group_step_1');
+             const step2 = document.getElementById('group_step_2');
+             const summary = document.getElementById('group_summary');
+             
+             if (step === 1) {
+                 step1.style.display = 'block';
+                 step2.style.display = 'none';
+                 summary.style.display = 'none';
+             } else if (step === 2) {
+                 step1.style.display = 'none';
+                 step2.style.display = 'block';
+                 summary.style.display = 'none';
+             } else if (step === 'summary') {
+                 step1.style.display = 'none';
+                 step2.style.display = 'none';
+                 summary.style.display = 'block';
+                 updateGroupSummary();
+             }
+         }
+         
+         // Group mode button event handlers
+         document.addEventListener('DOMContentLoaded', function() {
+             // Next to optional button
+             document.getElementById('next_to_optional').addEventListener('click', function() {
+                 showGroupStep(2);
+             });
+             
+             // Back to required button
+             document.getElementById('back_to_required').addEventListener('click', function() {
+                 showGroupStep(1);
+             });
+             
+             // Finish group selection button
+             document.getElementById('finish_group_selection').addEventListener('click', function() {
+                 showGroupStep('summary');
+             });
+             
+             // Edit group selection button
+             document.getElementById('edit_group_selection').addEventListener('click', function() {
+                 showGroupStep(1);
+             });
          });
          
          // Handle model changes - reload LoRA models when model changes
@@ -983,25 +1234,55 @@ async def root():
         }
         
         async function loadLoRAModels() {
-            const container = document.getElementById('lora_models_container');
+            const loraMode = document.getElementById('lora_mode').value;
+            const modelName = document.getElementById('model_name').value;
+            
+            if (loraMode === 'group') {
+                // Load models for group mode
+                await loadLoRAModelsForGroup();
+            } else {
+                // Load models for all mode
+                const container = document.getElementById('lora_models_container');
+                try {
+                    const response = await fetch(`/api/lora/models?model_name=${encodeURIComponent(modelName)}`);
+                    if (response.ok) {
+                        const models = await response.json();
+                        displayLoRAModels(models, container);
+                    } else {
+                        container.innerHTML = '<p>Failed to load LoRA models</p>';
+                    }
+                } catch (error) {
+                    container.innerHTML = '<p>Error loading LoRA models</p>';
+                    console.error('Failed to load LoRA models:', error);
+                }
+            }
+        }
+        
+        async function loadLoRAModelsForGroup() {
             const modelName = document.getElementById('model_name').value;
             
             try {
                 const response = await fetch(`/api/lora/models?model_name=${encodeURIComponent(modelName)}`);
                 if (response.ok) {
                     const models = await response.json();
-                    displayLoRAModels(models);
+                    // Load models into both required and optional containers
+                    const requiredContainer = document.getElementById('required_loras_container');
+                    const optionalContainer = document.getElementById('optional_loras_container');
+                    
+                    displayLoRAModels(models, requiredContainer, 'required');
+                    displayLoRAModels(models, optionalContainer, 'optional');
                 } else {
-                    container.innerHTML = '<p>Failed to load LoRA models</p>';
+                    document.getElementById('required_loras_container').innerHTML = '<p>Failed to load LoRA models</p>';
+                    document.getElementById('optional_loras_container').innerHTML = '<p>Failed to load LoRA models</p>';
                 }
             } catch (error) {
-                container.innerHTML = '<p>Error loading LoRA models</p>';
+                document.getElementById('required_loras_container').innerHTML = '<p>Error loading LoRA models</p>';
+                document.getElementById('optional_loras_container').innerHTML = '<p>Error loading LoRA models</p>';
                 console.error('Failed to load LoRA models:', error);
             }
         }
         
-        function displayLoRAModels(models) {
-            const container = document.getElementById('lora_models_container');
+        function displayLoRAModels(models, container, mode = 'all') {
             let html = '';
             
             const modelEntries = Object.entries(models).filter(([key]) => key !== '1');
@@ -1011,10 +1292,12 @@ async def root():
                 return;
             }
             
+            const namePrefix = mode === 'all' ? 'lora_models' : `${mode}_loras`;
+            
             for (const [key, model] of modelEntries) {
                 html += `
-                    <div class="lora-card" data-lora-id="${key}">
-                        <input type="checkbox" id="lora_${key}" name="lora_models" value="${key}">
+                    <div class="lora-card" data-lora-id="${key}" data-mode="${mode}">
+                        <input type="checkbox" id="${mode}_lora_${key}" name="${namePrefix}" value="${key}">
                         <div class="lora-card-content">
                             <div class="lora-name">${model.name}</div>
                             <div class="lora-description">${model.description}</div>
@@ -1046,13 +1329,65 @@ async def root():
                     } else {
                         card.classList.remove('selected');
                     }
+                    
+                    // Handle group mode logic
+                    if (mode === 'required') {
+                        updateRequiredLoRAButtons();
+                    }
                 });
             });
         }
         
         function getSelectedLoRAs() {
-            const checkboxes = document.querySelectorAll('input[name="lora_models"]:checked');
-            return Array.from(checkboxes).map(cb => cb.value);
+            const loraMode = document.getElementById('lora_mode').value;
+            console.log('getSelectedLoRAs called with mode:', loraMode);
+            
+            if (loraMode === 'group') {
+                const required = getSelectedLoRAsByType('required');
+                const optional = getSelectedLoRAsByType('optional');
+                console.log('Group mode - required checkboxes found:', required);
+                console.log('Group mode - optional checkboxes found:', optional);
+                return {
+                    required_loras: required,
+                    optional_loras: optional
+                };
+            } else {
+                const checkboxes = document.querySelectorAll('input[name="lora_models"]:checked');
+                const selected = Array.from(checkboxes).map(cb => cb.value);
+                console.log('Non-group mode - selected:', selected);
+                return selected;
+            }
+        }
+        
+        function getSelectedLoRAsByType(type) {
+            const selector = `input[name="${type}_loras"]:checked`;
+            console.log('getSelectedLoRAsByType selector:', selector);
+            const checkboxes = document.querySelectorAll(selector);
+            console.log('Found checkboxes for', type, ':', checkboxes.length);
+            const values = Array.from(checkboxes).map(cb => cb.value);
+            console.log('Values for', type, ':', values);
+            return values;
+        }
+        
+        function updateRequiredLoRAButtons() {
+            const selectedRequired = getSelectedLoRAsByType('required');
+            const nextButton = document.getElementById('next_to_optional');
+            
+            if (selectedRequired.length > 0) {
+                nextButton.style.display = 'inline-block';
+            } else {
+                nextButton.style.display = 'none';
+            }
+        }
+        
+        function updateGroupSummary() {
+            const requiredLoras = getSelectedLoRAsByType('required');
+            const optionalLoras = getSelectedLoRAsByType('optional');
+            
+            document.getElementById('required_summary').textContent = 
+                requiredLoras.length > 0 ? requiredLoras.join(', ') : 'None';
+            document.getElementById('optional_summary').textContent = 
+                optionalLoras.length > 0 ? optionalLoras.join(', ') : 'None';
         }
         
         // Agent selection
@@ -1075,6 +1410,9 @@ async def root():
             e.preventDefault();
             
             const formData = new FormData(e.target);
+            const loraMode = formData.get('lora_mode');
+            const selectedLoras = getSelectedLoRAs();
+            
             const data = {
                 agent_type: formData.get('agent_type'),
                 prompt: formData.get('prompt'),
@@ -1083,8 +1421,7 @@ async def root():
                 language: formData.get('language'),
                 video_provider: 'siliconflow',
                 lora_config: {},
-                lora_mode: formData.get('lora_mode'),
-                selected_loras: getSelectedLoRAs(),
+                lora_mode: loraMode,
                 model_name: formData.get('model_name'),
                 max_scenes: parseInt(formData.get('max_scenes')),
                 max_characters: parseInt(formData.get('max_characters')),
@@ -1093,6 +1430,25 @@ async def root():
                 comfyui_host: formData.get('comfyui_host') || null,
                 comfyui_port: formData.get('comfyui_port') ? parseInt(formData.get('comfyui_port')) : null
             };
+            
+            // Handle LoRA selection based on mode
+            console.log('LoRA Mode:', loraMode);
+            console.log('Selected LoRAs:', selectedLoras);
+            
+            if (loraMode === 'group') {
+                data.required_loras = selectedLoras.required_loras;
+                data.optional_loras = selectedLoras.optional_loras;
+                data.selected_loras = null;
+                console.log('Group mode - Required:', data.required_loras);
+                console.log('Group mode - Optional:', data.optional_loras);
+            } else {
+                data.selected_loras = selectedLoras;
+                data.required_loras = null;
+                data.optional_loras = null;
+                console.log('Non-group mode - Selected:', data.selected_loras);
+            }
+            
+            console.log('Final request data:', data);
             
             if (!data.agent_type) {
                 alert('Please select an agent type');
@@ -1408,7 +1764,15 @@ async def run_generation(task_id: str, request: GenerationRequest):
         
         # Process LoRA configuration
         lora_config = None
-        if request.lora_mode != "none" and request.selected_loras:
+        # Check if we should process LoRA config based on mode and available selections
+        should_process_lora = (
+            request.lora_mode != "none" and (
+                request.selected_loras or  # For 'all' mode
+                (request.lora_mode == "group" and (request.required_loras or request.optional_loras))  # For 'group' mode
+            )
+        )
+        
+        if should_process_lora:
             generation_tasks[task_id].progress = 10.0
             generation_tasks[task_id].message = "Configuring LoRA models..."
             generation_tasks[task_id].updated_at = datetime.now()
@@ -1561,8 +1925,23 @@ def get_lora_key_for_model_type(model_type: str) -> str:
 async def process_lora_config(request: GenerationRequest, task_id: str) -> Optional[Dict[str, Any]]:
     """Process LoRA configuration based on user selection."""
     try:
-        if not request.selected_loras:
-            return None
+        # Debug logging
+        print_info(f"Processing LoRA config for mode: {request.lora_mode}")
+        if request.lora_mode == "group":
+            print_info(f"Required LoRAs: {request.required_loras}")
+            print_info(f"Optional LoRAs: {request.optional_loras}")
+        else:
+            print_info(f"Selected LoRAs: {request.selected_loras}")
+        
+        # Check if we have any LoRA selection based on mode
+        if request.lora_mode == "group":
+            if not request.required_loras and not request.optional_loras:
+                print_info("No LoRAs selected for group mode, returning None")
+                return None
+        else:
+            if not request.selected_loras:
+                print_info("No LoRAs selected for non-group mode, returning None")
+                return None
         
         # Load LoRA configurations
         config_path = get_lora_config_path()
@@ -1582,8 +1961,19 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
         available_loras = lora_configs[model_type]["loras"]
         selected_lora_configs = []
         
-        # Build selected LoRA configurations
-        for lora_id in request.selected_loras:
+        # Build selected LoRA configurations based on mode
+        if request.lora_mode == "group":
+            # For group mode, combine required and optional LoRAs
+            all_selected = []
+            if request.required_loras:
+                all_selected.extend(request.required_loras)
+            if request.optional_loras:
+                all_selected.extend(request.optional_loras)
+        else:
+            # For non-group mode, use selected_loras
+            all_selected = request.selected_loras or []
+        
+        for lora_id in all_selected:
             if lora_id in available_loras:
                 lora_config = available_loras[lora_id]
                 selected_lora_configs.append({
@@ -1630,16 +2020,66 @@ async def process_lora_config(request: GenerationRequest, task_id: str) -> Optio
                     "seed": webui_seed  # Add seed to multiple LoRA config
                 }
         elif request.lora_mode == "group":
-            # For group mode, treat all selected as required LoRAs
-            return {
+            # For group mode, handle required and optional LoRAs separately
+            print_info("Processing group mode LoRA configuration")
+            required_lora_configs = []
+            optional_lora_configs = []
+            
+            # Process required LoRAs
+            if request.required_loras:
+                for lora_id in request.required_loras:
+                    if lora_id in available_loras:
+                        lora_config = available_loras[lora_id]
+                        required_lora_configs.append({
+                            "name": lora_config["name"],
+                            "file": lora_config["file"],
+                            "trigger": lora_config.get("display_trigger", ""),
+                            "description": lora_config["description"],
+                            "strength_model": lora_config.get("strength_model", 1.0),
+                            "strength_clip": lora_config.get("strength_clip", 1.0),
+                            "trigger_words": lora_config.get("trigger_words", {}),
+                            "essential_traits": lora_config.get("essential_traits", [])
+                        })
+            
+            # Process optional LoRAs
+            if request.optional_loras:
+                for lora_id in request.optional_loras:
+                    if lora_id in available_loras:
+                        lora_config = available_loras[lora_id]
+                        optional_lora_configs.append({
+                            "name": lora_config["name"],
+                            "file": lora_config["file"],
+                            "trigger": lora_config.get("display_trigger", ""),
+                            "description": lora_config["description"],
+                            "strength_model": lora_config.get("strength_model", 1.0),
+                            "strength_clip": lora_config.get("strength_clip", 1.0),
+                            "trigger_words": lora_config.get("trigger_words", {}),
+                            "essential_traits": lora_config.get("essential_traits", [])
+                        })
+            
+            # Create optional descriptions for LLM
+            optional_descriptions = []
+            for lora in optional_lora_configs:
+                description = {
+                    "name": lora["name"],
+                    "description": lora["description"],
+                    "trigger": lora.get("trigger", ""),
+                    "strength_model": lora["strength_model"],
+                    "strength_clip": lora["strength_clip"]
+                }
+                optional_descriptions.append(description)
+            
+            group_config = {
                 "mode": "group",
                 "model_type": model_type,
-                "required_loras": selected_lora_configs,
-                "optional_loras": [],
-                "required_trigger": ", ".join([lora["trigger"] for lora in selected_lora_configs if lora["trigger"]]),
-                "optional_descriptions": [],
+                "required_loras": required_lora_configs,
+                "optional_loras": optional_lora_configs,
+                "required_trigger": ", ".join([lora["trigger"] for lora in required_lora_configs if lora["trigger"]]),
+                "optional_descriptions": optional_descriptions,
                 "seed": webui_seed  # Add seed to group mode config
             }
+            print_info(f"Group mode config created: {group_config['mode']}, Required: {len(required_lora_configs)}, Optional: {len(optional_lora_configs)}")
+            return group_config
         
         return None
         
